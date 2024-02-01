@@ -15,3 +15,5 @@ class UserModel(Base):
     updated_on = Column(DateTime, nullable=True, default=None, onupdate=datetime.now)
     created_on = Column(DateTime, nullable=False, server_default=func.now())
 
+
+
