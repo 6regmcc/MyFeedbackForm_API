@@ -3,7 +3,7 @@ from fastapi.exceptions import HTTPException
 from core.security import verify_password
 from core.database import get_setting
 from datetime import timedelta
-from core.security import create_access_token, create_refresh_token
+from core.security import create_access_token, create_refresh_token, get_token_payload
 from auth.respoonses import TokenResponse
 
 
@@ -28,6 +28,18 @@ async def get_token(data, db):
 
     return await _get_user_token(user=user)
 
+async def get_refresh_token(token, db):
+    payload = get_token_payload(token)
+    user_id = payload.get("user_id", None)
+    user = db.query(UserModel).filter(UserModel.user_id == user_id).first()
+    if not user_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid refresh token",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return await _get_user_token(user=user, refresh_token=token)
+
 
 async def _get_user_token(user: UserModel, refresh_token = None):
     payload = {"user_id": user.user_id}
@@ -40,3 +52,5 @@ async def _get_user_token(user: UserModel, refresh_token = None):
         refresh_token=refresh_token,
         expires_in=access_token_expires.seconds
     )
+
+
