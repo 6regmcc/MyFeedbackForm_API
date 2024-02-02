@@ -12,5 +12,5 @@ class SurveyModel(Base):
     survey_name = Column(String(300))
     date_created = Column(DateTime, nullable=False, server_default=func.now())
     date_modified = Column(DateTime, nullable=True, default=None, onupdate=datetime.now)
-    owner_id = Column(Integer, ForeignKey('users.user_id'))
+    owner_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
     #owner = relationship("Owner", back_populates = "surveys")

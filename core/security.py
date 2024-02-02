@@ -6,7 +6,7 @@ from starlette.authentication import AuthCredentials, UnauthenticatedUser
 from core.config import get_setting
 from fastapi import Depends
 from core.database import get_db
-from users.moldels import UserModel
+from users.models import UserModel
 
 settings = get_setting()
 

@@ -1,4 +1,4 @@
-from users.moldels import UserModel
+from users.models import UserModel
 from fastapi.exceptions import HTTPException
 from core.security import get_password_hash
 from datetime import datetime
