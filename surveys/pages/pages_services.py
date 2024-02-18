@@ -9,7 +9,7 @@ from surveys.pages.pages_schemas import CreatePageData
 
 
 
-
+#add return type
 def create_page_db(data: CreatePageData, db: Session):
     new_page = SurveyPage(
         page_title=data.page_title,
