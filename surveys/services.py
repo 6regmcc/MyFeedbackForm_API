@@ -26,6 +26,8 @@ def create_survey_db(data: CreateSurveyData, db: Session):
     create_page_db(new_page, db)
     return new_survey
 
-def get_surveys_db(owner_id: int, db: Session) -> list[Survey]:
-    founds_surveys = db.execute(select(SurveyModel).where(SurveyModel.owner_id ==  owner_id))
-    return founds_surveys
+def get_surveys_db(owner_id: int, db: Session):
+    query = select(SurveyModel).where(SurveyModel.owner_id == owner_id)
+    result = db.scalars(query)
+    #print(result.a)
+    return result.all()

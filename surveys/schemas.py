@@ -20,3 +20,7 @@ class Survey(BaseModel):
     date_created: datetime
     date_modified: datetime
     survey_id: int
+
+
+class Surveys(BaseModel):
+    data: list[Survey]
