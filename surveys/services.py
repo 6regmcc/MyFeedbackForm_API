@@ -1,10 +1,10 @@
 from datetime import datetime
-
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from surveys.moldels import SurveyModel
 from surveys.pages.pages_services import create_page_db
-from surveys.schemas import CreateSurveyData
+from surveys.schemas import CreateSurveyData, Survey
 from surveys.pages.pages_models import SurveyPage
 
 
@@ -25,3 +25,7 @@ def create_survey_db(data: CreateSurveyData, db: Session):
     )
     create_page_db(new_page, db)
     return new_survey
+
+def get_surveys_db(owner_id: int, db: Session) -> list[Survey]:
+    founds_surveys = db.execute(select(SurveyModel).where(SurveyModel.owner_id ==  owner_id))
+    return founds_surveys

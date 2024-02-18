@@ -13,3 +13,10 @@ class CreateSurveyResponse(CreateSurveyData):
     date_created: datetime
     date_modified: datetime
     survey_id: int
+
+
+class Survey(BaseModel):
+    survey_name: str
+    date_created: datetime
+    date_modified: datetime
+    survey_id: int

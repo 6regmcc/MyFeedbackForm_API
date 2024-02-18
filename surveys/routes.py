@@ -21,3 +21,8 @@ def create_survey(data: CreateSurveyRequest, request: Request, db: Session = Dep
         owner_id = request.user.user_id
     )
     return create_survey_db(new_survey, db)
+
+
+@router.get("")
+def get_surveys(request: Request, db: Session = Depends(get_db)):
+    pass
