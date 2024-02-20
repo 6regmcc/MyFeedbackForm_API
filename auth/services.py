@@ -1,3 +1,6 @@
+from sqlalchemy.orm import Session
+
+from surveys.moldels import SurveyModel
 from users.models import UserModel
 from fastapi.exceptions import HTTPException
 from core.security import verify_password
@@ -5,6 +8,7 @@ from core.database import get_setting
 from datetime import timedelta
 from core.security import create_access_token, create_refresh_token, get_token_payload
 from auth.respoonses import TokenResponse
+from sqlalchemy import select
 
 
 settings = get_setting()
@@ -54,3 +58,16 @@ async def _get_user_token(user: UserModel, refresh_token = None):
     )
 
 
+
+
+def check_if_user_has_access_to_survey(owner_id: int, survey_id: int, db: Session):
+    survey = db.query(SurveyModel).filter(SurveyModel.survey_id == survey_id).first()
+    if survey is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Not found."
+        )
+    if survey.owner_id == owner_id:
+        return True
+    else:
+        return False

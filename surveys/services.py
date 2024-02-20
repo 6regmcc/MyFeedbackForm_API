@@ -29,5 +29,4 @@ def create_survey_db(data: CreateSurveyData, db: Session):
 def get_surveys_db(owner_id: int, db: Session):
     query = select(SurveyModel).where(SurveyModel.owner_id == owner_id)
     result = db.scalars(query)
-    #print(result.a)
     return result.all()

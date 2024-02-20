@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from surveys.pages.questions.questions_models import Question, CloseEndedAnswerChoice
@@ -69,3 +69,36 @@ def create_multi_choice_question_choice_db(choice: ClosedAnswerChoiceRequestData
     db.commit()
     db.refresh(choice)
     return choice
+
+
+def get_question_db(survey_id, question_id, db: Session ):
+    found_question = db.query(Question).filter(Question.question_id == question_id).filter(Question.survey_id == survey_id).first()
+    print(found_question)
+    if found_question is None:
+        print('this is printing')
+        return None
+    if found_question.question_type == "closed_ended":
+        choices_arr = []
+        choices = db.query(CloseEndedAnswerChoice).filter(CloseEndedAnswerChoice.question_id == question_id)
+        for choice in choices:
+            choices_arr.append(ClosedAnswerChoice(
+                choice_id=choice.choice_id,
+                date_created=choice.date_created,
+                date_modified=choice.date_modified,
+                choice_label=choice.choice_label
+            ))
+
+        multi_choice_question = MultipleChoiceQuestion(
+            question_type=found_question.question_type,
+            question_variant=found_question.question_variant,
+            question_text=found_question.question_text,
+            survey_id=found_question.survey_id,
+            page_id=found_question.page_id,
+            question_id=found_question.question_id,
+            date_created=found_question.date_created,
+            date_modified=found_question.date_modified,
+            answer_choices=choices_arr
+        )
+
+        return multi_choice_question
+
