@@ -3,10 +3,10 @@ from datetime import datetime
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from surveys.pages.questions.questions_models import Question, CloseEndedAnswerChoice
+from surveys.pages.questions.questions_models import Question, CloseEndedAnswerChoice, OpenEndedAnswerChoice
 from surveys.pages.questions.questions_schemas import CreateMultipleChoiceQuestionData, \
     CreateQuestionData, CreateQuestionResponse, ClosedAnswerChoiceRequestData, ClosedAnswerChoice, \
-    MultipleChoiceQuestion
+    MultipleChoiceQuestion, OpenEndedAnswerChoiceRequest, OpenEndedAnswerChoiceResponse, OpenEndedQuestion
 
 
 def create_question_db(new_question: CreateQuestionData, db: Session) -> CreateQuestionResponse:
@@ -63,8 +63,63 @@ def create_multi_choice_question_db(new_multi_choice_question: CreateMultipleCho
     return create_question_with_choices
 
 
+def create_open_ended_question_db(open_ended_question: CreateQuestionData, db: Session):
+    new_question = Question(
+        question_text=open_ended_question.question_text,
+        question_type=open_ended_question.question_type,
+        question_variant=open_ended_question.question_variant,
+        page_id=open_ended_question.page_id,
+        survey_id=open_ended_question.survey_id,
+        date_created=datetime.now(),
+        date_modified=datetime.now()
+    )
+
+    created_question: CreateQuestionResponse = create_question_db(new_question, db)
+
+    created_answer_choices: list[OpenEndedAnswerChoiceResponse] = []
+
+    for choice in open_ended_question.answer_choices:
+        new_open_ended_answer_choice = OpenEndedAnswerChoice (
+            **choice.dict(),
+            date_created = datetime.now(),
+            date_modified = datetime.now(),
+            question_id = created_question.question_id
+        )
+        created_choice = create_open_ended_answer_choice_db(new_open_ended_answer_choice, db)
+        model_created_choice = OpenEndedAnswerChoiceResponse(
+            choice_id=created_choice.choice_id,
+            question_id=created_choice.question_id,
+            open_ended_choice_type=created_choice.open_ended_choice_type,
+            choice_label=created_choice.choice_label,
+            date_created=created_choice.date_created,
+            date_modified=created_choice.date_modified
+        )
+        created_answer_choices.append(model_created_choice)
+
+    created_question_with_choices = OpenEndedQuestion(
+        question_type=created_question.question_type,
+        question_variant=created_question.question_variant,
+        question_text=created_question.question_text,
+        survey_id=created_question.survey_id,
+        page_id=created_question.page_id,
+        question_id=created_question.question_id,
+        date_created=created_question.date_created,
+        date_modified=created_question.date_modified,
+        answer_choices = created_answer_choices
+    )
+
+    return created_question_with_choices
+
+
+
 
 def create_multi_choice_question_choice_db(choice: ClosedAnswerChoiceRequestData, db: Session) -> ClosedAnswerChoice:
+    db.add(choice)
+    db.commit()
+    db.refresh(choice)
+    return choice
+
+def create_open_ended_answer_choice_db(choice: OpenEndedAnswerChoiceRequest, db: Session) -> OpenEndedAnswerChoiceResponse:
     db.add(choice)
     db.commit()
     db.refresh(choice)
@@ -75,30 +130,33 @@ def get_question_db(survey_id, question_id, db: Session ):
     found_question = db.query(Question).filter(Question.question_id == question_id).filter(Question.survey_id == survey_id).first()
     print(found_question)
     if found_question is None:
-        print('this is printing')
         return None
     if found_question.question_type == "closed_ended":
-        choices_arr = []
-        choices = db.query(CloseEndedAnswerChoice).filter(CloseEndedAnswerChoice.question_id == question_id)
-        for choice in choices:
-            choices_arr.append(ClosedAnswerChoice(
-                choice_id=choice.choice_id,
-                date_created=choice.date_created,
-                date_modified=choice.date_modified,
-                choice_label=choice.choice_label
-            ))
+        return  return_multi_choice_question(question_id=question_id, db=db)
 
-        multi_choice_question = MultipleChoiceQuestion(
-            question_type=found_question.question_type,
-            question_variant=found_question.question_variant,
-            question_text=found_question.question_text,
-            survey_id=found_question.survey_id,
-            page_id=found_question.page_id,
-            question_id=found_question.question_id,
-            date_created=found_question.date_created,
-            date_modified=found_question.date_modified,
-            answer_choices=choices_arr
-        )
 
-        return multi_choice_question
 
+def return_multi_choice_question(found_question: Question,question_id: int, db: Session) -> MultipleChoiceQuestion:
+    choices_arr = []
+    choices = db.query(CloseEndedAnswerChoice).filter(CloseEndedAnswerChoice.question_id == question_id)
+    for choice in choices:
+        choices_arr.append(ClosedAnswerChoice(
+            choice_id=choice.choice_id,
+            date_created=choice.date_created,
+            date_modified=choice.date_modified,
+            choice_label=choice.choice_label
+        ))
+
+    multi_choice_question = MultipleChoiceQuestion(
+        question_type=found_question.question_type,
+        question_variant=found_question.question_variant,
+        question_text=found_question.question_text,
+        survey_id=found_question.survey_id,
+        page_id=found_question.page_id,
+        question_id=found_question.question_id,
+        date_created=found_question.date_created,
+        date_modified=found_question.date_modified,
+        answer_choices=choices_arr
+    )
+
+    return multi_choice_question

@@ -1,11 +1,51 @@
+from enum import Enum
+from typing import Optional
+
 from pydantic import BaseModel
 from datetime import datetime
 
 
+class OpenEndedAnswerChoiceEnum(str, Enum):
+    answer_choice = "answer_choice"
+    other_answer_choice = "other_answer_choice"
+
+
+
+class OpenEndedAnswerChoiceRequest(BaseModel):
+    open_ended_choice_type: str
+    choice_label: str | None
+
+class OpenEndedAnswerChoiceData(OpenEndedAnswerChoiceRequest):
+    question_id: int
+
+class OpenEndedAnswerChoiceResponse(OpenEndedAnswerChoiceData):
+    choice_id: int
+    date_created: datetime
+    date_modified: datetime
+
+
+class QuestionTypeEnum(str, Enum):
+    closed_ended = "closed_ended"
+    open_ended = "open_ended"
+
+
+class QuestionVariantEnum(str, Enum):
+    single_choice = "single_choice"
+    multi_choice = "multi_choice"
+
+class ClosedAnswerChoiceRequest(BaseModel):
+    choice_label: str
+
 class CreateQuestionRequest(BaseModel):
-    question_type: str = "closed_ended"
-    question_variant: str = "single_choice"
+    question_type: QuestionTypeEnum
+    question_variant: QuestionVariantEnum
     question_text: str
+    answer_choices: list[OpenEndedAnswerChoiceRequest | ClosedAnswerChoiceRequest] | None = None
+    has_other_answer_choice: bool = False
+
+    class Config:
+        orm_mode = True
+
 
 
 
@@ -19,8 +59,7 @@ class CreateQuestionResponse(CreateQuestionData):
     date_modified: datetime
 
 
-class ClosedAnswerChoiceRequest(BaseModel):
-    choice_label: str
+
 
 
 class ClosedAnswerChoiceRequestData(ClosedAnswerChoiceRequest):
@@ -38,6 +77,8 @@ class ClosedAnswerChoice(ClosedAnswerChoiceRequest):
     choice_id: int
     date_created: datetime
     date_modified: datetime
+    class Config:
+        orm_mode = True
 
 
 
@@ -53,9 +94,21 @@ class CreateMultipleChoiceQuestionData(BaseModel):
 
 class MultipleChoiceQuestion(CreateQuestionResponse):
     answer_choices: list[ClosedAnswerChoice]
+    class Config:
+        orm_mode = True
 
 
 
+
+class CreateOpenEndedQuestionData(CreateQuestionData):
+    answer_choices: list[OpenEndedAnswerChoiceRequest]
+    class Config:
+        orm_mode = True
+
+class OpenEndedQuestion(CreateQuestionResponse):
+    answer_choices: list[OpenEndedAnswerChoiceResponse]
+    class Config:
+        orm_mode = True
 
 
 
