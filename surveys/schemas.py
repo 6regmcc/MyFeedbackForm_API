@@ -28,3 +28,6 @@ class Surveys(BaseModel):
 
 class SurveyWithPages(Survey):
     pages: list[int]
+
+class SurveyWithPagesDetails(Survey):
+    pages: list

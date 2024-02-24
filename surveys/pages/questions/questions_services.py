@@ -206,18 +206,18 @@ def return_open_ended_question(found_question: QuestionDB, question_id, db):
             question_id=choice.question_id
         ))
 
-        open_ended_question = OpenEndedQuestion(
-            question_type=found_question.question_type,
-            question_variant=found_question.question_variant,
-            question_text=found_question.question_text,
-            survey_id=found_question.survey_id,
-            page_id=found_question.page_id,
-            question_id=found_question.question_id,
-            date_created=found_question.date_created,
-            date_modified=found_question.date_modified,
-            question_position=found_question.question_position,
-            answer_choices=choices_arr
-        )
+    open_ended_question = OpenEndedQuestion(
+        question_type=found_question.question_type,
+        question_variant=found_question.question_variant,
+        question_text=found_question.question_text,
+        survey_id=found_question.survey_id,
+        page_id=found_question.page_id,
+        question_id=found_question.question_id,
+        date_created=found_question.date_created,
+        date_modified=found_question.date_modified,
+        question_position=found_question.question_position,
+        answer_choices=choices_arr
+    )
 
     return open_ended_question
 

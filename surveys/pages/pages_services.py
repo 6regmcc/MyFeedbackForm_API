@@ -26,7 +26,7 @@ def create_page_db(data: CreatePageData, db: Session):
     return new_page
 
 
-def get_page_db(survey_id: int, page_id: int, db: Session) -> SurveyPage:
+def get_page_db(survey_id: int, page_id: int, db: Session):
     page_query = select(SurveyPageDB).where(SurveyPageDB.survey_id == survey_id).where(SurveyPageDB.page_id == page_id)
     page = db.scalars(page_query).first()
     if page is None:
@@ -41,7 +41,7 @@ def get_page_db(survey_id: int, page_id: int, db: Session) -> SurveyPage:
 
 
 def get_page_details_db(survey_id: int, page_id: int, db: Session):
-    page_query = select(SurveyPageDB).where(SurveyPageDB.survey_id == survey_id).where(SurveyPageDB.page_id == page_id)
+    page_query = select(SurveyPageDB).where(SurveyPageDB.survey_id == survey_id).where(SurveyPageDB.page_id == page_id).order_by(SurveyPageDB.page_position)
     page = db.scalars(page_query).first()
     if page is None:
         return None

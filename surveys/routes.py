@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 from auth.services import check_if_user_has_access_to_survey
 from core.database import get_db
 from core.security import oauth2_scheme
-from surveys.schemas import CreateSurveyRequest, CreateSurveyData, CreateSurveyResponse, Survey, Surveys
-from surveys.services import create_survey_db, get_surveys_db, get_survey_db
+from surveys.schemas import CreateSurveyRequest, CreateSurveyData, CreateSurveyResponse, Survey, Surveys, \
+    SurveyWithPages
+from surveys.services import create_survey_db, get_surveys_db, get_survey_db, get_survey_details_db
 
 router = APIRouter(
     prefix="/surveys",
@@ -34,7 +35,7 @@ def get_surveys(request: Request, db: Session = Depends(get_db)):
     return {"data": survey_arr}
 
 
-@router.get("/{survey_id}")
+@router.get("/{survey_id}", response_model=SurveyWithPages)
 def get_survey(request: Request, survey_id: int, db: Session = Depends(get_db)):
     owner_id = request.user.user_id
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
@@ -43,6 +44,24 @@ def get_survey(request: Request, survey_id: int, db: Session = Depends(get_db)):
             detail="You do not have access to this resource"
         )
     found_survey = get_survey_db(survey_id=survey_id, db=db)
+    if found_survey is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Survey not found"
+        )
+
+    return found_survey
+
+
+@router.get("/{survey_id}/details")
+def get_survey_details(request: Request, survey_id: int, db: Session = Depends(get_db)):
+    owner_id = request.user.user_id
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+        )
+    found_survey = get_survey_details_db(survey_id=survey_id, db=db)
     if found_survey is None:
         raise HTTPException(
             status_code=404,
