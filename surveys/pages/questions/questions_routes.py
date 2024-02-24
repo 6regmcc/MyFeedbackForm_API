@@ -5,9 +5,10 @@ from auth.services import check_if_user_has_access_to_survey
 from core.database import get_db
 from core.security import oauth2_scheme
 from surveys.pages.questions.questions_schemas import CreateQuestionRequest, CreateQuestionData, \
-    CreateMultipleChoiceQuestionRequest, CreateMultipleChoiceQuestionData, CreateOpenEndedQuestionData
+    CreateMultipleChoiceQuestionRequest, CreateMultipleChoiceQuestionData, CreateOpenEndedQuestionData, \
+    CreateQuestionResponse
 from surveys.pages.questions.questions_services import create_multi_choice_question_db, get_question_db, \
-    create_open_ended_question_db
+    create_open_ended_question_db, set_question_position
 
 router = APIRouter(
     prefix="/surveys/{survey_id}/pages/{page_id}/questions",
@@ -17,7 +18,7 @@ router = APIRouter(
 )
 
 
-@router.post("", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=CreateQuestionResponse)
 def create_question(page_id: int, survey_id: int, create_question_request: CreateQuestionRequest,
                     db: Session = Depends(get_db)):
     if create_question_request.question_type == "closed_ended":
@@ -25,6 +26,7 @@ def create_question(page_id: int, survey_id: int, create_question_request: Creat
             question_text=create_question_request.question_text,
             question_type=create_question_request.question_type,
             question_variant=create_question_request.question_variant,
+            question_position=set_question_position(page_id=page_id, db=db),
             page_id=page_id,
             survey_id=survey_id,
             answer_choices=create_question_request.answer_choices
@@ -37,13 +39,14 @@ def create_question(page_id: int, survey_id: int, create_question_request: Creat
             **create_question_request.dict(),
             page_id=page_id,
             survey_id=survey_id,
+            question_position=set_question_position(page_id=page_id, db=db),
 
         )
 
         return create_open_ended_question_db(new_open_ended_question, db)
 
 
-@router.get("/{question_id}")
+@router.get("/{question_id}", response_model=CreateQuestionResponse)
 def get_question(survey_id: int, page_id: int, question_id: int, request: Request, db: Session = Depends(get_db)):
     owner_id = request.user.user_id
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):

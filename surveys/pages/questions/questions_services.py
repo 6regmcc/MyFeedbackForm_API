@@ -145,12 +145,26 @@ def get_question_db(survey_id, question_id, db: Session):
 
 
 def get_list_of_question_on_page(page_id: int, db: Session) -> list[int]:
-    query = select(QuestionDB).where(QuestionDB.page_id == page_id)
+    query = select(QuestionDB).where(QuestionDB.page_id == page_id).order_by(QuestionDB.question_position)
     found_questions = db.scalars(query).all()
     question_arr = []
     for question in found_questions:
         question_arr.append(question.question_id)
     return question_arr
+
+
+def get_question_list_details_db(page_id: int, db: Session):
+    query = select(QuestionDB).where(QuestionDB.page_id == page_id).order_by(QuestionDB.question_position)
+    found_questions = db.scalars(query).all()
+    question_arr = []
+    for question in found_questions:
+        if question.question_type == "closed_ended":
+            question_arr.append(MultipleChoiceQuestion(**question.__dict__))
+        elif question.question_type == "open_ended":
+            question_arr.append(OpenEndedQuestion(**question.__dict__))
+    return question_arr
+
+
 
 
 def return_multi_choice_question(found_question: QuestionDB, question_id: int, db: Session) -> MultipleChoiceQuestion:
@@ -168,6 +182,7 @@ def return_multi_choice_question(found_question: QuestionDB, question_id: int, d
         question_type=found_question.question_type,
         question_variant=found_question.question_variant,
         question_text=found_question.question_text,
+        question_position=found_question.question_position,
         survey_id=found_question.survey_id,
         page_id=found_question.page_id,
         question_id=found_question.question_id,
@@ -202,6 +217,7 @@ def return_open_ended_question(found_question: QuestionDB, question_id, db):
             question_id=found_question.question_id,
             date_created=found_question.date_created,
             date_modified=found_question.date_modified,
+            question_position=found_question.question_position,
             answer_choices=choices_arr
         )
 
@@ -209,8 +225,5 @@ def return_open_ended_question(found_question: QuestionDB, question_id, db):
 
 
 def set_question_position(page_id: int, db: Session):
-    question_length = len(get_list_of_question_on_page(page_id=page_id, db=db))
-    if question_length == 0:
-        return 1
-    else:
-        return question_length + 1
+    return len(get_list_of_question_on_page(page_id=page_id, db=db)) + 1
+

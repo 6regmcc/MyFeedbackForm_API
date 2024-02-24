@@ -60,6 +60,7 @@ class CreateQuestionResponse(CreateQuestionData):
     question_id: int
     date_created: datetime
     date_modified: datetime
+    answer_choices: list[OpenEndedAnswerChoiceRequest | ClosedAnswerChoiceRequest] | None
 
 
 class ClosedAnswerChoiceRequestData(ClosedAnswerChoiceRequest):
