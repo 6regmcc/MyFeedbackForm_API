@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from surveys.moldels import SurveyModel
 from surveys.pages.pages_services import create_page_db
 from surveys.schemas import CreateSurveyData, Survey
-from surveys.pages.pages_models import SurveyPage
+from surveys.pages.pages_models import SurveyPageDB
 
 
 def create_survey_db(data: CreateSurveyData, db: Session):
@@ -20,11 +20,12 @@ def create_survey_db(data: CreateSurveyData, db: Session):
     db.add(new_survey)
     db.commit()
     db.refresh(new_survey)
-    new_page = SurveyPage(
+    new_page = SurveyPageDB(
         survey_id = new_survey.survey_id
     )
     create_page_db(new_page, db)
     return new_survey
+
 
 def get_surveys_db(owner_id: int, db: Session):
     query = select(SurveyModel).where(SurveyModel.owner_id == owner_id)

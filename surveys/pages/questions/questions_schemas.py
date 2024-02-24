@@ -10,13 +10,14 @@ class OpenEndedAnswerChoiceEnum(str, Enum):
     other_answer_choice = "other_answer_choice"
 
 
-
 class OpenEndedAnswerChoiceRequest(BaseModel):
     open_ended_choice_type: str
     choice_label: str | None
 
+
 class OpenEndedAnswerChoiceData(OpenEndedAnswerChoiceRequest):
     question_id: int
+
 
 class OpenEndedAnswerChoiceResponse(OpenEndedAnswerChoiceData):
     choice_id: int
@@ -33,8 +34,10 @@ class QuestionVariantEnum(str, Enum):
     single_choice = "single_choice"
     multi_choice = "multi_choice"
 
+
 class ClosedAnswerChoiceRequest(BaseModel):
     choice_label: str
+
 
 class CreateQuestionRequest(BaseModel):
     question_type: QuestionTypeEnum
@@ -47,19 +50,15 @@ class CreateQuestionRequest(BaseModel):
         orm_mode = True
 
 
-
-
 class CreateQuestionData(CreateQuestionRequest):
     survey_id: int
     page_id: int
+
 
 class CreateQuestionResponse(CreateQuestionData):
     question_id: int
     date_created: datetime
     date_modified: datetime
-
-
-
 
 
 class ClosedAnswerChoiceRequestData(ClosedAnswerChoiceRequest):
@@ -70,16 +69,13 @@ class CreateMultipleChoiceQuestionRequest(CreateQuestionRequest):
     answer_choices: list[ClosedAnswerChoiceRequest]
 
 
-
-
-
 class ClosedAnswerChoice(ClosedAnswerChoiceRequest):
     choice_id: int
     date_created: datetime
     date_modified: datetime
+
     class Config:
         orm_mode = True
-
 
 
 class CreateMultipleChoiceQuestionData(BaseModel):
@@ -91,24 +87,26 @@ class CreateMultipleChoiceQuestionData(BaseModel):
     answer_choices: list[ClosedAnswerChoiceRequest]
 
 
-
 class MultipleChoiceQuestion(CreateQuestionResponse):
     answer_choices: list[ClosedAnswerChoice]
+
     class Config:
         orm_mode = True
-
-
 
 
 class CreateOpenEndedQuestionData(CreateQuestionData):
     answer_choices: list[OpenEndedAnswerChoiceRequest]
+
     class Config:
         orm_mode = True
 
+
 class OpenEndedQuestion(CreateQuestionResponse):
     answer_choices: list[OpenEndedAnswerChoiceResponse]
+
     class Config:
         orm_mode = True
+
 
 
 

@@ -9,7 +9,8 @@ from surveys.pages.pages_routes import router as pages_router
 from surveys.pages.questions.questions_routes import router as questions_router
 from starlette.middleware.authentication import AuthenticationMiddleware
 from core.security import JWTAuth
-#test
+import uvicorn
+
 
 Base.metadata.create_all(engine)
 
@@ -24,6 +25,11 @@ app.include_router(questions_router)
 
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())
 
+
 @app.get('/')
 def root():
     return {"status": "Running"}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -4,7 +4,7 @@ from datetime import datetime
 from core.database import Base
 
 
-class SurveyPage(Base):
+class SurveyPageDB(Base):
     __tablename__ = "pages"
     page_id = Column(Integer, primary_key=True, index=True)
     page_title =  Column(String(300))
