@@ -3,8 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from surveys.moldels import SurveyModel
-from surveys.pages.pages_services import create_page_db
-from surveys.schemas import CreateSurveyData, Survey
+from surveys.pages.pages_services import create_page_db, get_list_of_pages_db
+from surveys.schemas import CreateSurveyData, Survey, SurveyWithPages
 from surveys.pages.pages_models import SurveyPageDB
 
 
@@ -31,3 +31,16 @@ def get_surveys_db(owner_id: int, db: Session):
     query = select(SurveyModel).where(SurveyModel.owner_id == owner_id)
     result = db.scalars(query)
     return result.all()
+
+
+def get_survey_db(survey_id: int, db: Session) -> SurveyWithPages:
+    query = select(SurveyModel).where(SurveyModel.survey_id == survey_id)
+    result = db.scalars(query).first()
+
+    pages_arr = get_list_of_pages_db(survey_id=survey_id, db=db)
+    survey = SurveyWithPages(
+        **result.__dict__,
+        pages=pages_arr
+    )
+
+    return survey

@@ -51,3 +51,12 @@ def get_page_details_db(survey_id: int, page_id: int, db: Session):
     )
 
     return survey_page
+
+
+def get_list_of_pages_db(survey_id: int, db: Session) -> list[int]:
+    query = select(SurveyPageDB).where(SurveyPageDB.survey_id == survey_id).order_by(SurveyPageDB.page_position)
+    found_pages = db.scalars(query).all()
+    page_arr = []
+    for page in found_pages:
+        page_arr.append(page.page_id)
+    return page_arr
