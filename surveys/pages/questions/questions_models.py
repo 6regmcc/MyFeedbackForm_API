@@ -14,6 +14,7 @@ class QuestionDB(Base):
     date_created = Column(DateTime, nullable=False, server_default=func.now())
     date_modified = Column(DateTime, nullable=True, default=None, onupdate=datetime.now)
     page_id = Column(Integer, ForeignKey('pages.page_id'), nullable=False)
+    question_position = Column(Integer, nullable=False, unique=True)
     survey_id = Column(Integer, ForeignKey('surveys.survey_id'), nullable=False)
 
 

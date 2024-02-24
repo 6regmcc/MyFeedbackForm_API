@@ -17,12 +17,14 @@ def create_question_db(new_question: CreateQuestionData, db: Session) -> CreateQ
 
 
 def create_multi_choice_question_db(new_multi_choice_question: CreateMultipleChoiceQuestionData, db: Session):
+
     new_question = QuestionDB(
         question_text=new_multi_choice_question.question_text,
         question_type=new_multi_choice_question.question_type,
         question_variant=new_multi_choice_question.question_variant,
         page_id=new_multi_choice_question.page_id,
         survey_id=new_multi_choice_question.survey_id,
+        question_position=set_question_position(page_id=new_multi_choice_question.page_id, db=db),
         date_created=datetime.now(),
         date_modified=datetime.now()
     )
@@ -54,6 +56,7 @@ def create_multi_choice_question_db(new_multi_choice_question: CreateMultipleCho
         survey_id=created_question.survey_id,
         page_id=created_question.page_id,
         question_id=created_question.question_id,
+        question_position=created_question.question_position,
         date_created=created_question.date_created,
         date_modified=created_question.date_modified,
         answer_choices=created_answer_choices
@@ -64,12 +67,14 @@ def create_multi_choice_question_db(new_multi_choice_question: CreateMultipleCho
 
 
 def create_open_ended_question_db(open_ended_question: CreateQuestionData, db: Session):
+
     new_question = QuestionDB(
         question_text=open_ended_question.question_text,
         question_type=open_ended_question.question_type,
         question_variant=open_ended_question.question_variant,
         page_id=open_ended_question.page_id,
         survey_id=open_ended_question.survey_id,
+        question_position=set_question_position(page_id=open_ended_question.page_id, db=db),
         date_created=datetime.now(),
         date_modified=datetime.now()
     )
@@ -103,6 +108,7 @@ def create_open_ended_question_db(open_ended_question: CreateQuestionData, db: S
         survey_id=created_question.survey_id,
         page_id=created_question.page_id,
         question_id=created_question.question_id,
+        question_position=created_question.question_position,
         date_created=created_question.date_created,
         date_modified=created_question.date_modified,
         answer_choices=created_answer_choices
@@ -202,3 +208,9 @@ def return_open_ended_question(found_question: QuestionDB, question_id, db):
     return open_ended_question
 
 
+def set_question_position(page_id: int, db: Session):
+    question_length = len(get_list_of_question_on_page(page_id=page_id, db=db))
+    if question_length == 0:
+        return 1
+    else:
+        return question_length + 1

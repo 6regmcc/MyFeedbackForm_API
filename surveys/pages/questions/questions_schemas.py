@@ -53,6 +53,7 @@ class CreateQuestionRequest(BaseModel):
 class CreateQuestionData(CreateQuestionRequest):
     survey_id: int
     page_id: int
+    question_position: int
 
 
 class CreateQuestionResponse(CreateQuestionData):

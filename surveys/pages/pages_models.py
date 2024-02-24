@@ -9,6 +9,7 @@ class SurveyPageDB(Base):
     page_id = Column(Integer, primary_key=True, index=True)
     page_title =  Column(String(300))
     page_description = Column(String(500))
+    page_position = Column(Integer, nullable=False)
     date_created = Column(DateTime, nullable=False, server_default=func.now())
     date_modified = Column(DateTime, nullable=True, default=None, onupdate=datetime.now)
 
