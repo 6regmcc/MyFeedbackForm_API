@@ -15,6 +15,7 @@ class CreatePageData(CreatePageRequest):
 
 
 class CreatePageResponse(CreatePageData):
+    page_position: int
     page_id: int
     date_created: datetime
     date_modified: datetime

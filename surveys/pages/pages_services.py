@@ -15,6 +15,7 @@ def create_page_db(data: CreatePageData, db: Session):
         page_title=data.page_title,
         page_description=data.page_description,
         survey_id=data.survey_id,
+        page_position=set_page_position(data.survey_id, db=db),
         date_created=datetime.now(),
         date_modified=datetime.now()
     )
@@ -60,3 +61,7 @@ def get_list_of_pages_db(survey_id: int, db: Session) -> list[int]:
     for page in found_pages:
         page_arr.append(page.page_id)
     return page_arr
+
+
+def set_page_position(survey_id: int, db: Session):
+    return len(get_list_of_pages_db(survey_id=survey_id, db=db)) + 1
