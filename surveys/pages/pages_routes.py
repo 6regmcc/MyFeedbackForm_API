@@ -5,7 +5,7 @@ from auth.services import check_if_user_has_access_to_survey
 from core.database import get_db
 from core.security import oauth2_scheme
 from surveys.pages.pages_schemas import CreatePageRequest, CreatePageData, SurveyPage
-from surveys.pages.pages_services import create_page_db, get_page_db
+from surveys.pages.pages_services import create_page_db, get_page_db, get_page_details_db
 
 router = APIRouter(
     prefix="/surveys/{survey_id}/pages",

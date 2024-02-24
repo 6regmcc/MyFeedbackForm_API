@@ -25,7 +25,7 @@ class SurveyPage(CreatePageResponse):
 
 
 class SurveyPageDetails(CreatePageResponse):
-    question: list[OpenEndedQuestion | MultipleChoiceQuestion]
+    questions: list[OpenEndedQuestion | MultipleChoiceQuestion]
 
 
 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 
 from surveys.pages.pages_models import SurveyPageDB
-from surveys.pages.pages_schemas import CreatePageData, SurveyPage
+from surveys.pages.pages_schemas import CreatePageData, SurveyPage, SurveyPageDetails
 from surveys.pages.questions.questions_services import get_list_of_question_on_page, get_question_list_details_db
 
 
@@ -45,7 +45,9 @@ def get_page_details_db(survey_id: int, page_id: int, db: Session):
     if page is None:
         return None
     question_list = get_question_list_details_db(page_id=page.page_id, db=db)
-    survey_page = SurveyPage(
+    survey_page = SurveyPageDetails(
         **page.__dict__,
         questions=question_list
     )
+
+    return survey_page

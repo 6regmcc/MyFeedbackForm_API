@@ -159,9 +159,9 @@ def get_question_list_details_db(page_id: int, db: Session):
     question_arr = []
     for question in found_questions:
         if question.question_type == "closed_ended":
-            question_arr.append(MultipleChoiceQuestion(**question.__dict__))
+            question_arr.append(return_multi_choice_question(found_question=question, question_id=question.question_id, db=db))
         elif question.question_type == "open_ended":
-            question_arr.append(OpenEndedQuestion(**question.__dict__))
+            question_arr.append(return_open_ended_question(found_question=question, question_id=question.question_id, db=db))
     return question_arr
 
 
