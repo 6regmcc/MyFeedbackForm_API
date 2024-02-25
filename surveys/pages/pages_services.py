@@ -46,8 +46,10 @@ def get_page_details_db(survey_id: int, page_id: int, db: Session):
     if page is None:
         return None
     question_list = get_question_list_details_db(page_id=page.page_id, db=db)
+    del page._sa_instance_state
     survey_page = SurveyPageDetails(
         **page.__dict__,
+
         questions=question_list
     )
 

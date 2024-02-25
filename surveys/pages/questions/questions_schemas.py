@@ -112,8 +112,4 @@ class OpenEndedQuestion(CreateQuestionResponse):
         orm_mode = True
 
 
-class TestCreateClosedChoice(NoExtraBaseModel):
-    choice_label: str
 
-    class Config:
-        extra = "forbid"

@@ -38,6 +38,7 @@ def get_survey_db(survey_id: int, db: Session) -> SurveyWithPages:
     result = db.scalars(query).first()
 
     pages_arr = get_list_of_pages_db(survey_id=survey_id, db=db)
+
     survey = SurveyWithPages(
         **result.__dict__,
         pages=pages_arr

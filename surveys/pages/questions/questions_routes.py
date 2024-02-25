@@ -6,7 +6,8 @@ from core.database import get_db
 from core.security import oauth2_scheme
 from surveys.pages.questions.questions_schemas import CreateQuestionRequest, CreateQuestionData, \
     CreateMultipleChoiceQuestionRequest, CreateMultipleChoiceQuestionData, CreateOpenEndedQuestionData, \
-    CreateQuestionResponse, ClosedAnswerChoiceRequest, OpenEndedAnswerChoiceResponse, TestCreateClosedChoice
+    CreateQuestionResponse, ClosedAnswerChoiceRequest, \
+    OpenEndedAnswerChoiceRequest
 from surveys.pages.questions.questions_services import create_multi_choice_question_db, get_question_db, \
     create_open_ended_question_db, set_question_position
 
@@ -68,7 +69,7 @@ def get_question(survey_id: int, page_id: int, question_id: int, request: Reques
 
 @router.post("/{question_id}/choices")
 def create_answer_choice(survey_id: int, page_id: int, question_id: int,
-                         new_ans_choice_request: TestCreateClosedChoice,
+                         new_ans_choice_request: OpenEndedAnswerChoiceRequest | ClosedAnswerChoiceRequest,
                          request: Request, db: Session = Depends(get_db)):
     owner_id = request.user.user_id
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
@@ -84,7 +85,7 @@ def create_answer_choice(survey_id: int, page_id: int, question_id: int,
             detail="Not found"
 
         )
-    if isinstance(new_ans_choice_request, TestCreateClosedChoice):
+    if isinstance(new_ans_choice_request, ClosedAnswerChoiceRequest):
         print("this workedasdfasdf")
     else:
         raise HTTPException(
