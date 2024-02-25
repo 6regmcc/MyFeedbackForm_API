@@ -1,4 +1,6 @@
 from datetime import datetime
+
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -61,4 +63,19 @@ def get_survey_details_db(survey_id: int, db: Session):
     )
 
     return survey_details
+
+
+def delete_survey_db(survey_id: int, db: Session):
+    query = select(SurveyModel).where(SurveyModel.survey_id == survey_id)
+    found_survey = db.scalars(query).first()
+    if found_survey is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find question"
+        )
+    db.delete(found_survey)
+    db.commit()
+    deleted_question = {**found_survey.__dict__}
+    # del deleted_question._sa_instance_state
+    return f"survey deleted: {deleted_question}"
 

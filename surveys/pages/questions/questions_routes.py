@@ -117,7 +117,7 @@ def create_answer_choice(survey_id: int, page_id: int, question_id: int,
 
 
 @router.delete("/{question_id}")
-def delete_question(survey_id: int, question_id: int, request: Request, db: Session = Depends(get_db)):
+def delete_question(survey_id: int, page_id:int, question_id: int, request: Request, db: Session = Depends(get_db)):
     owner_id = request.user.user_id
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(

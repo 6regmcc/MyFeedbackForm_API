@@ -6,7 +6,7 @@ from core.database import get_db
 from core.security import oauth2_scheme
 from surveys.schemas import CreateSurveyRequest, CreateSurveyData, CreateSurveyResponse, Survey, Surveys, \
     SurveyWithPages
-from surveys.services import create_survey_db, get_surveys_db, get_survey_db, get_survey_details_db
+from surveys.services import create_survey_db, get_surveys_db, get_survey_db, get_survey_details_db, delete_survey_db
 
 router = APIRouter(
     prefix="/surveys",
@@ -70,4 +70,12 @@ def get_survey_details(request: Request, survey_id: int, db: Session = Depends(g
     return found_survey
 
 
-
+@router.delete("/{survey_}")
+def delete_survey(request: Request, survey_id: int, db: Session = Depends(get_db)):
+    owner_id = request.user.user_id
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+        )
+    return delete_survey_db(survey_id=survey_id, db=db)

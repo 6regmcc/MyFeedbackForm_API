@@ -63,6 +63,7 @@ def get_page_details(page_id: int, survey_id: int, request: Request, db: Session
 
     return found_page_with_details
 
+
 @router.delete("/{page_id}")
 def delete_page(page_id: int, survey_id: int, request: Request, db: Session = Depends(get_db)):
     owner_id = request.user.user_id
