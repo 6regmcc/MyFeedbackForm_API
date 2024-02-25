@@ -22,7 +22,8 @@ class OpenEndedAnswerChoiceData(OpenEndedAnswerChoiceRequest):
 
 
 class OpenEndedAnswerChoiceResponse(OpenEndedAnswerChoiceData):
-    choice_id: int
+    oe_choice_id: int
+    choice_position: int
     date_created: datetime
     date_modified: datetime
 
@@ -39,6 +40,7 @@ class QuestionVariantEnum(str, Enum):
 
 class ClosedAnswerChoiceRequest(NoExtraBaseModel):
     choice_label: str
+
 
 
 class ClosedAnswerChoiceRequestArr(NoExtraBaseModel):
@@ -78,9 +80,10 @@ class CreateMultipleChoiceQuestionRequest(CreateQuestionRequest):
 
 
 class ClosedAnswerChoice(ClosedAnswerChoiceRequest):
-    choice_id: int
+    ce_choice_id: int
     date_created: datetime
     date_modified: datetime
+    choice_position: int
 
     class Config:
         orm_mode = True

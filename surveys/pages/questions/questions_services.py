@@ -37,18 +37,20 @@ def create_multi_choice_question_db(new_multi_choice_question: CreateMultipleCho
 
     created_answer_choices: list[ClosedAnswerChoice] = []
 
-    for choice in new_multi_choice_question.answer_choices:
+    for index, choice in enumerate(new_multi_choice_question.answer_choices):
         new_closed_ended_answer_choice = CloseEndedAnswerChoice(
             choice_label=choice.choice_label,
             date_created=datetime.now(),
             date_modified=datetime.now(),
+            choice_position= index +  1,
             question_id=created_question.question_id
         )
         created_choice = create_multi_choice_question_choice_db(new_closed_ended_answer_choice, db)
         created_choice_model = ClosedAnswerChoice(
             choice_label=created_choice.choice_label,
-            choice_id=created_choice.choice_id,
+            ce_choice_id=created_choice.ce_choice_id,
             date_created=created_choice.date_created,
+            choice_position=created_choice.choice_position,
             date_modified=created_choice.date_modified
         )
         created_answer_choices.append(created_choice_model)
@@ -87,20 +89,23 @@ def create_open_ended_question_db(open_ended_question: CreateQuestionData, db: S
 
     created_answer_choices: list[OpenEndedAnswerChoiceResponse] = []
 
-    for choice in open_ended_question.answer_choices:
+    for index, choice in enumerate(open_ended_question.answer_choices):
         new_open_ended_answer_choice = OpenEndedAnswerChoice(
-            **choice.dict(),
+            open_ended_choice_type=choice.open_ended_choice_type,
+            choice_label=choice.choice_label,
             date_created=datetime.now(),
             date_modified=datetime.now(),
-            question_id=created_question.question_id
+            question_id=created_question.question_id,
+            choice_position=index+1
         )
         created_choice = create_open_ended_answer_choice_db(new_open_ended_answer_choice, db)
         model_created_choice = OpenEndedAnswerChoiceResponse(
-            choice_id=created_choice.choice_id,
+            oe_choice_id=created_choice.oe_choice_id,
             question_id=created_choice.question_id,
             open_ended_choice_type=created_choice.open_ended_choice_type,
             choice_label=created_choice.choice_label,
             date_created=created_choice.date_created,
+            choice_position=created_choice.choice_position,
             date_modified=created_choice.date_modified
         )
         created_answer_choices.append(model_created_choice)
