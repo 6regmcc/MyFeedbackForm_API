@@ -179,10 +179,11 @@ def return_multi_choice_question(found_question: QuestionDB, question_id: int, d
     choices = db.query(CloseEndedAnswerChoice).filter(CloseEndedAnswerChoice.question_id == question_id)
     for choice in choices:
         choices_arr.append(ClosedAnswerChoice(
-            choice_id=choice.choice_id,
+            ce_choice_id=choice.ce_choice_id,
             date_created=choice.date_created,
             date_modified=choice.date_modified,
-            choice_label=choice.choice_label
+            choice_label=choice.choice_label,
+            choice_position=choice.choice_position
         ))
 
     multi_choice_question = MultipleChoiceQuestion(
@@ -207,11 +208,12 @@ def return_open_ended_question(found_question: QuestionDB, question_id, db):
     choices = db.scalars(query).all()
     for choice in choices:
         choices_arr.append(OpenEndedAnswerChoiceResponse(
-            choice_id=choice.choice_id,
+            oe_choice_id=choice.oe_choice_id,
             open_ended_choice_type=choice.open_ended_choice_type,
             choice_label=choice.choice_label,
             date_created=choice.date_created,
             date_modified=choice.date_modified,
+            choice_position=choice.choice_position,
             question_id=choice.question_id
         ))
 
@@ -273,3 +275,30 @@ def delete_question_db(question_id: int, survey_id: int, db: Session):
     deleted_question = {**found_question.__dict__}
     #del deleted_question._sa_instance_state
     return f"question deleted: {deleted_question}"
+
+
+def get_list_of_ce_choices(question_id: int, db: Session) -> list[int]:
+    query = select(CloseEndedAnswerChoice).where(CloseEndedAnswerChoice.question_id == question_id).order_by(CloseEndedAnswerChoice.choice_position)
+    found_choices = db.scalars(query).all()
+    choice_arr = []
+    for choice in found_choices:
+        choice_arr.append(choice.ce_choice_id)
+    return choice_arr
+
+
+def get_list_of_oe_choices(question_id: int, db: Session) -> list[int]:
+    query = select(OpenEndedAnswerChoice).where(OpenEndedAnswerChoice.question_id == question_id).order_by(OpenEndedAnswerChoice.choice_position)
+    found_choices = db.scalars(query).all()
+    choice_arr = []
+    for choice in found_choices:
+        choice_arr.append(choice.oe_choice_id)
+    return choice_arr
+
+
+def set_choice_position(question_id: int, question_type:str, db: Session):
+
+    if question_type == "open_ended":
+        return len(get_list_of_oe_choices(question_id=question_id, db=db)) + 1
+    elif question_type == "closed_ended":
+        return len(get_list_of_ce_choices(question_id=question_id, db=db)) + 1
+

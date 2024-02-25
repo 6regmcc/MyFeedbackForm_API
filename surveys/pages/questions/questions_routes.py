@@ -13,7 +13,8 @@ from surveys.pages.questions.questions_schemas import CreateQuestionRequest, Cre
     OpenEndedAnswerChoiceRequest, ClosedAnswerChoiceRequestData, ClosedAnswerChoiceRequestArr
 from surveys.pages.questions.questions_services import create_multi_choice_question_db, get_question_db, \
     create_open_ended_question_db, set_question_position, create_multi_choice_question_choice_db, \
-    create_open_ended_answer_choice_db, delete_closed_choice_db, delete_open_choice_db, delete_question_db
+    create_open_ended_answer_choice_db, delete_closed_choice_db, delete_open_choice_db, delete_question_db, \
+    set_choice_position
 
 router = APIRouter(
     prefix="/surveys/{survey_id}/pages/{page_id}/questions",
@@ -96,6 +97,7 @@ def create_answer_choice(survey_id: int, page_id: int, question_id: int,
             choice_label=new_ans_choice_request.choice_label,
             date_created=datetime.now(),
             date_modified=datetime.now(),
+            choice_position=set_choice_position(question_id=question_id, question_type="closed_ended", db=db),
             question_id=question_id
         )
         return create_multi_choice_question_choice_db(new_closed_ans_choice, db=db)
@@ -106,6 +108,7 @@ def create_answer_choice(survey_id: int, page_id: int, question_id: int,
             open_ended_choice_type=new_ans_choice_request.open_ended_choice_type,
             date_created=datetime.now(),
             date_modified=datetime.now(),
+            choice_position=set_choice_position(question_id=question_id, question_type="open_ended", db=db),
             question_id=question_id
         )
         return create_open_ended_answer_choice_db(new_open_ans_choice, db=db)

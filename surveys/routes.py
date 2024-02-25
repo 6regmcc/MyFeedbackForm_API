@@ -70,7 +70,7 @@ def get_survey_details(request: Request, survey_id: int, db: Session = Depends(g
     return found_survey
 
 
-@router.delete("/{survey_}")
+@router.delete("/{survey_id}")
 def delete_survey(request: Request, survey_id: int, db: Session = Depends(get_db)):
     owner_id = request.user.user_id
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
