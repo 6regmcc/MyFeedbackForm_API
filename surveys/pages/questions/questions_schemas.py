@@ -28,6 +28,26 @@ class OpenEndedAnswerChoiceResponse(OpenEndedAnswerChoiceData):
     date_modified: datetime
 
 
+class OpenEndedAnswerChoice(OpenEndedAnswerChoiceData):
+    oe_choice_id: int
+    choice_position: int
+    date_created: datetime
+    date_modified: datetime
+
+class ClosedAnswerChoiceRequest(NoExtraBaseModel):
+    choice_label: str
+
+
+class ClosedAnswerChoice(ClosedAnswerChoiceRequest):
+    ce_choice_id: int
+    date_created: datetime
+    date_modified: datetime
+    choice_position: int
+
+    class Config:
+        orm_mode = True
+
+
 class QuestionTypeEnum(str, Enum):
     closed_ended = "closed_ended"
     open_ended = "open_ended"
@@ -38,8 +58,7 @@ class QuestionVariantEnum(str, Enum):
     multi_choice = "multi_choice"
 
 
-class ClosedAnswerChoiceRequest(NoExtraBaseModel):
-    choice_label: str
+
 
 
 
@@ -68,7 +87,7 @@ class CreateQuestionResponse(CreateQuestionData):
     question_id: int
     date_created: datetime
     date_modified: datetime
-    answer_choices: list[OpenEndedAnswerChoiceRequest | ClosedAnswerChoiceRequest] | None
+    answer_choices: list[OpenEndedAnswerChoiceResponse | ClosedAnswerChoice] | None
 
 
 class ClosedAnswerChoiceRequestData(ClosedAnswerChoiceRequest):
@@ -79,14 +98,8 @@ class CreateMultipleChoiceQuestionRequest(CreateQuestionRequest):
     answer_choices: list[ClosedAnswerChoiceRequest]
 
 
-class ClosedAnswerChoice(ClosedAnswerChoiceRequest):
-    ce_choice_id: int
-    date_created: datetime
-    date_modified: datetime
-    choice_position: int
 
-    class Config:
-        orm_mode = True
+
 
 
 class CreateMultipleChoiceQuestionData(NoExtraBaseModel):
