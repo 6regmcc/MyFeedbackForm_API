@@ -252,3 +252,17 @@ def delete_open_choice_db(choice_id: int, db: Session):
     db.delete(query)
     db.commit()
     return "choice deleted"
+
+
+def delete_question_db(question_id: int, db: Session):
+    query = db.get(QuestionDB, question_id)
+    if query is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find question"
+        )
+    db.delete(query)
+    db.commit()
+    deleted_question = {**query.__dict__}
+    del deleted_question._sa_instance_state
+    return f"question deleted: {deleted_question}"

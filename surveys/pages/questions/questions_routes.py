@@ -13,7 +13,7 @@ from surveys.pages.questions.questions_schemas import CreateQuestionRequest, Cre
     OpenEndedAnswerChoiceRequest, ClosedAnswerChoiceRequestData, ClosedAnswerChoiceRequestArr
 from surveys.pages.questions.questions_services import create_multi_choice_question_db, get_question_db, \
     create_open_ended_question_db, set_question_position, create_multi_choice_question_choice_db, \
-    create_open_ended_answer_choice_db, delete_closed_choice_db, delete_open_choice_db
+    create_open_ended_answer_choice_db, delete_closed_choice_db, delete_open_choice_db, delete_question_db
 
 router = APIRouter(
     prefix="/surveys/{survey_id}/pages/{page_id}/questions",
@@ -116,6 +116,18 @@ def create_answer_choice(survey_id: int, page_id: int, question_id: int,
         )
 
 
+@router.delete("/{question_id}")
+def delete_question(survey_id: int, question_id: int, request: Request, db: Session = Depends(get_db)):
+    owner_id = request.user.user_id
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+
+        )
+    return delete_question_db(question_id=question_id, db=db)
+
+
 @router.delete("/{question_id}/choices/{choice_id}")
 def delete_choice(survey_id: int, question_id: int, choice_id: int, request: Request, db: Session = Depends(get_db)):
     owner_id = request.user.user_id
@@ -139,3 +151,5 @@ def delete_choice(survey_id: int, question_id: int, choice_id: int, request: Req
         return delete_open_choice_db(choice_id=choice_id, db=db)
     else:
         return "something went wrong"
+
+
