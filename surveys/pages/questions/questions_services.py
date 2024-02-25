@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import func, select, delete
 from sqlalchemy.orm import Session
 
 
@@ -157,8 +157,8 @@ def get_list_of_question_on_page(page_id: int, db: Session) -> list[int]:
     return question_arr
 
 
-def get_question_list_details_db(page_id: int, db: Session):
-    query = select(QuestionDB).where(QuestionDB.page_id == page_id).order_by(QuestionDB.question_position)
+def get_question_list_details_db(page_id: int,survey_id: int, db: Session):
+    query = select(QuestionDB).where((QuestionDB.page_id == page_id) & (QuestionDB.survey_id == survey_id)).order_by(QuestionDB.question_position)
     found_questions = db.scalars(query).all()
     question_arr = []
     for question in found_questions:
@@ -254,15 +254,16 @@ def delete_open_choice_db(choice_id: int, db: Session):
     return "choice deleted"
 
 
-def delete_question_db(question_id: int, db: Session):
-    query = db.get(QuestionDB, question_id)
-    if query is None:
+def delete_question_db(question_id: int, survey_id: int, db: Session):
+
+    query = delete(QuestionDB).where((QuestionDB.question_id == question_id) & (QuestionDB.survey_id == survey_id))
+    if query.description is None:
         raise HTTPException(
             status_code=404,
             detail="Unable to find question"
         )
-    db.delete(query)
+    db.execute(query)
     db.commit()
     deleted_question = {**query.__dict__}
-    del deleted_question._sa_instance_state
+    #del deleted_question._sa_instance_state
     return f"question deleted: {deleted_question}"

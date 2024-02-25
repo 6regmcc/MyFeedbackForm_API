@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -41,11 +42,11 @@ def get_page_db(survey_id: int, page_id: int, db: Session):
 
 
 def get_page_details_db(survey_id: int, page_id: int, db: Session):
-    page_query = select(SurveyPageDB).where(SurveyPageDB.survey_id == survey_id).where(SurveyPageDB.page_id == page_id).order_by(SurveyPageDB.page_position)
+    page_query = select(SurveyPageDB).where((SurveyPageDB.survey_id == survey_id) & (SurveyPageDB.page_id == page_id)).order_by(SurveyPageDB.page_position)
     page = db.scalars(page_query).first()
     if page is None:
         return None
-    question_list = get_question_list_details_db(page_id=page.page_id, db=db)
+    question_list = get_question_list_details_db(page_id=page.page_id, survey_id=survey_id, db=db)
     del page._sa_instance_state
     survey_page = SurveyPageDetails(
         **page.__dict__,
@@ -67,3 +68,17 @@ def get_list_of_pages_db(survey_id: int, db: Session) -> list[int]:
 
 def set_page_position(survey_id: int, db: Session):
     return len(get_list_of_pages_db(survey_id=survey_id, db=db)) + 1
+
+
+def delete_page_db(survey_id: int, page_id: int, db: Session):
+    query = db.get(SurveyPageDB, page_id)
+    if query is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find question"
+        )
+    db.delete(query)
+    db.commit()
+    deleted_page = {**query.__dict__}
+    # del deleted_question._sa_instance_state
+    return f"question page: {deleted_page}"

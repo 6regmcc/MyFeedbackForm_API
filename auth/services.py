@@ -59,7 +59,8 @@ async def _get_user_token(user: UserModel, refresh_token = None):
     )
 
 def check_if_user_has_access_to_survey(owner_id: int, survey_id: int, db: Session):
-    survey = db.query(SurveyModel).filter(SurveyModel.survey_id == survey_id).first()
+    query = select(SurveyModel).where(SurveyModel.survey_id == survey_id)
+    survey = db.scalars(query).first()
     if survey is None:
         raise HTTPException(
             status_code=404,
@@ -75,3 +76,4 @@ def check_if_user_has_access_to_question(owner_id: int, survey_id: int, question
     query = select(QuestionDB).where(QuestionDB.survey_id == survey_id).where(QuestionDB.question_id == question_id)
     found_question = db.scalars(query).first()
     return found_question
+

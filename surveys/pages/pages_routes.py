@@ -5,11 +5,11 @@ from auth.services import check_if_user_has_access_to_survey
 from core.database import get_db
 from core.security import oauth2_scheme
 from surveys.pages.pages_schemas import CreatePageRequest, CreatePageData, SurveyPage
-from surveys.pages.pages_services import create_page_db, get_page_db, get_page_details_db
+from surveys.pages.pages_services import create_page_db, get_page_db, get_page_details_db, delete_page_db
 
 router = APIRouter(
     prefix="/surveys/{survey_id}/pages",
-    tags=["Surveys"],
+    tags=["Pages"],
     responses={404: {"description": "Not found"}},
     dependencies=[Depends(oauth2_scheme)]
 )
@@ -62,3 +62,14 @@ def get_page_details(page_id: int, survey_id: int, request: Request, db: Session
         )
 
     return found_page_with_details
+
+@router.delete("/{page_id}")
+def delete_page(page_id: int, survey_id: int, request: Request, db: Session = Depends(get_db)):
+    owner_id = request.user.user_id
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+
+        )
+    return delete_page_db(survey_id=survey_id, page_id=page_id, db=db)
