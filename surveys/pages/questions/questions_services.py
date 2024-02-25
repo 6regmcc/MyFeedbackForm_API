@@ -1,7 +1,10 @@
 from datetime import datetime
 
+from fastapi import HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
+
+
 
 from surveys.pages.questions.questions_models import QuestionDB, CloseEndedAnswerChoice, OpenEndedAnswerChoice
 from surveys.pages.questions.questions_schemas import CreateMultipleChoiceQuestionData, \
@@ -227,3 +230,25 @@ def set_question_position(page_id: int, db: Session):
     return len(get_list_of_question_on_page(page_id=page_id, db=db)) + 1
 
 
+def delete_closed_choice_db(choice_id: int, db: Session):
+    query = db.get(CloseEndedAnswerChoice, choice_id)
+    if query is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find answer choice"
+        )
+    db.delete(query)
+    db.commit()
+    return "choice deleted"
+
+
+def delete_open_choice_db(choice_id: int, db: Session):
+    query = db.get(OpenEndedAnswerChoice, choice_id)
+    if query is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find answer choice"
+        )
+    db.delete(query)
+    db.commit()
+    return "choice deleted"

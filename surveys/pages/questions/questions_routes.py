@@ -13,14 +13,34 @@ from surveys.pages.questions.questions_schemas import CreateQuestionRequest, Cre
     OpenEndedAnswerChoiceRequest, ClosedAnswerChoiceRequestData, ClosedAnswerChoiceRequestArr
 from surveys.pages.questions.questions_services import create_multi_choice_question_db, get_question_db, \
     create_open_ended_question_db, set_question_position, create_multi_choice_question_choice_db, \
-    create_open_ended_answer_choice_db
+    create_open_ended_answer_choice_db, delete_closed_choice_db, delete_open_choice_db
 
 router = APIRouter(
     prefix="/surveys/{survey_id}/pages/{page_id}/questions",
-    tags=["Surveys"],
+    tags=["Questions"],
     responses={404: {"description": "Not found"}},
     dependencies=[Depends(oauth2_scheme)]
 )
+
+
+@router.get("/{question_id}")
+def get_question(survey_id: int, page_id: int, question_id: int, request: Request, db: Session = Depends(get_db)):
+    owner_id = request.user.user_id
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+
+        )
+    found_question = get_question_db(survey_id=survey_id, question_id=question_id, db=db)
+    if found_question is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Not found"
+
+        )
+    else:
+        return found_question
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=CreateQuestionResponse)
@@ -50,26 +70,6 @@ def create_question(page_id: int, survey_id: int, create_question_request: Creat
         )
 
         return create_open_ended_question_db(new_open_ended_question, db)
-
-
-@router.get("/{question_id}", response_model=CreateQuestionResponse)
-def get_question(survey_id: int, page_id: int, question_id: int, request: Request, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
-    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have access to this resource"
-
-        )
-    found_question = get_question_db(survey_id=survey_id, question_id=question_id, db=db)
-    if found_question is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Not found"
-
-        )
-    else:
-        return found_question
 
 
 @router.post("/{question_id}/choices")
@@ -115,3 +115,27 @@ def create_answer_choice(survey_id: int, page_id: int, question_id: int,
             detail=f"Incorrect schema for question type: {found_question.question_type.value}"
         )
 
+
+@router.delete("/{question_id}/choices/{choice_id}")
+def delete_choice(survey_id: int, question_id: int, choice_id: int, request: Request, db: Session = Depends(get_db)):
+    owner_id = request.user.user_id
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+
+        )
+    found_question = get_question_db(survey_id=survey_id, question_id=question_id, db=db)
+    if found_question is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Question Not found"
+
+        )
+
+    if found_question.question_type == "closed_ended":
+        return delete_closed_choice_db(choice_id=choice_id, db=db)
+    elif found_question.question_type == "open_ended":
+        return delete_open_choice_db(choice_id=choice_id, db=db)
+    else:
+        return "something went wrong"

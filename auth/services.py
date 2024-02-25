@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
 from surveys.moldels import SurveyModel
+from surveys.pages.questions.questions_models import QuestionDB
 from users.models import UserModel
 from fastapi.exceptions import HTTPException
 from core.security import verify_password
@@ -57,9 +58,6 @@ async def _get_user_token(user: UserModel, refresh_token = None):
         expires_in=access_token_expires.seconds
     )
 
-
-
-
 def check_if_user_has_access_to_survey(owner_id: int, survey_id: int, db: Session):
     survey = db.query(SurveyModel).filter(SurveyModel.survey_id == survey_id).first()
     if survey is None:
@@ -71,3 +69,9 @@ def check_if_user_has_access_to_survey(owner_id: int, survey_id: int, db: Sessio
         return True
     else:
         return False
+
+
+def check_if_user_has_access_to_question(owner_id: int, survey_id: int, question_id,db: Session):
+    query = select(QuestionDB).where(QuestionDB.survey_id == survey_id).where(QuestionDB.question_id == question_id)
+    found_question = db.scalars(query).first()
+    return found_question
