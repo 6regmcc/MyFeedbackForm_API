@@ -54,7 +54,7 @@ def get_survey_details_db(survey_id: int, db: Session):
     pages_arr = get_list_of_pages_db(survey_id=survey_id, db=db)
     for page in pages_arr:
         pages_details_arr.append(get_page_details_db(survey_id=survey_id, page_id=page, db=db))
-
+    del survey._sa_instance_state
     survey_details = SurveyWithPagesDetails(
         **survey.__dict__,
         pages=pages_details_arr

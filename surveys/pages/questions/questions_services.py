@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from surveys.pages.questions.questions_models import QuestionDB, CloseEndedAnswerChoice, OpenEndedAnswerChoice
 from surveys.pages.questions.questions_schemas import CreateMultipleChoiceQuestionData, \
     CreateQuestionData, CreateQuestionResponse, ClosedAnswerChoiceRequestData, ClosedAnswerChoice, \
-    MultipleChoiceQuestion, OpenEndedAnswerChoiceRequest, OpenEndedAnswerChoiceResponse, OpenEndedQuestion
+    MultipleChoiceQuestion, OpenEndedAnswerChoiceRequest, OpenEndedAnswerChoiceResponse, OpenEndedQuestion, \
+    ClosedAnswerChoiceRequest
 
 
 def create_question_db(new_question: CreateQuestionData, db: Session) -> CreateQuestionResponse:
@@ -117,7 +118,7 @@ def create_open_ended_question_db(open_ended_question: CreateQuestionData, db: S
     return created_question_with_choices
 
 
-def create_multi_choice_question_choice_db(choice: ClosedAnswerChoiceRequestData, db: Session) -> ClosedAnswerChoice:
+def create_multi_choice_question_choice_db(choice: CloseEndedAnswerChoice, db: Session) -> ClosedAnswerChoice:
     db.add(choice)
     db.commit()
     db.refresh(choice)
@@ -224,4 +225,5 @@ def return_open_ended_question(found_question: QuestionDB, question_id, db):
 
 def set_question_position(page_id: int, db: Session):
     return len(get_list_of_question_on_page(page_id=page_id, db=db)) + 1
+
 

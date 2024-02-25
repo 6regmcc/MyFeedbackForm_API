@@ -1,15 +1,19 @@
+from datetime import datetime
+
 from fastapi import APIRouter, status, Request, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from auth.services import check_if_user_has_access_to_survey
 from core.database import get_db
 from core.security import oauth2_scheme
+from surveys.pages.questions.questions_models import CloseEndedAnswerChoice, OpenEndedAnswerChoice
 from surveys.pages.questions.questions_schemas import CreateQuestionRequest, CreateQuestionData, \
     CreateMultipleChoiceQuestionRequest, CreateMultipleChoiceQuestionData, CreateOpenEndedQuestionData, \
     CreateQuestionResponse, ClosedAnswerChoiceRequest, \
-    OpenEndedAnswerChoiceRequest
+    OpenEndedAnswerChoiceRequest, ClosedAnswerChoiceRequestData, ClosedAnswerChoiceRequestArr
 from surveys.pages.questions.questions_services import create_multi_choice_question_db, get_question_db, \
-    create_open_ended_question_db, set_question_position
+    create_open_ended_question_db, set_question_position, create_multi_choice_question_choice_db, \
+    create_open_ended_answer_choice_db
 
 router = APIRouter(
     prefix="/surveys/{survey_id}/pages/{page_id}/questions",
@@ -22,6 +26,7 @@ router = APIRouter(
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=CreateQuestionResponse)
 def create_question(page_id: int, survey_id: int, create_question_request: CreateQuestionRequest,
                     db: Session = Depends(get_db)):
+
     if create_question_request.question_type == "closed_ended":
         new_multi_choice_question = CreateMultipleChoiceQuestionData(
             question_text=create_question_request.question_text,
@@ -85,10 +90,28 @@ def create_answer_choice(survey_id: int, page_id: int, question_id: int,
             detail="Not found"
 
         )
-    if isinstance(new_ans_choice_request, ClosedAnswerChoiceRequest):
-        print("this workedasdfasdf")
+    if isinstance(new_ans_choice_request, ClosedAnswerChoiceRequest) and found_question.question_type == "closed_ended":
+        print("this is a closed ended request")
+        new_closed_ans_choice = CloseEndedAnswerChoice(
+            choice_label=new_ans_choice_request.choice_label,
+            date_created=datetime.now(),
+            date_modified=datetime.now(),
+            question_id=question_id
+        )
+        return create_multi_choice_question_choice_db(new_closed_ans_choice, db=db)
+    elif isinstance(new_ans_choice_request, OpenEndedAnswerChoiceRequest) and found_question.question_type == "open_ended":
+        print("this is an open ended request")
+        new_open_ans_choice = OpenEndedAnswerChoice (
+            choice_label=new_ans_choice_request.choice_label,
+            open_ended_choice_type=new_ans_choice_request.open_ended_choice_type,
+            date_created=datetime.now(),
+            date_modified=datetime.now(),
+            question_id=question_id
+        )
+        return create_open_ended_answer_choice_db(new_open_ans_choice, db=db)
     else:
         raise HTTPException(
             status_code=400,
-            detail="didn't work"
+            detail=f"Incorrect schema for question type: {found_question.question_type.value}"
         )
+

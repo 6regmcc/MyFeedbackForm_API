@@ -41,6 +41,10 @@ class ClosedAnswerChoiceRequest(NoExtraBaseModel):
     choice_label: str
 
 
+class ClosedAnswerChoiceRequestArr(NoExtraBaseModel):
+    answer_choices: list[ClosedAnswerChoiceRequest]
+
+
 class CreateQuestionRequest(NoExtraBaseModel):
     question_type: QuestionTypeEnum
     question_variant: QuestionVariantEnum
@@ -85,6 +89,7 @@ class ClosedAnswerChoice(ClosedAnswerChoiceRequest):
 class CreateMultipleChoiceQuestionData(NoExtraBaseModel):
     question_type: str = "closed_ended"
     question_variant: str = "single_choice"
+    question_position: int
     question_text: str
     survey_id: int
     page_id: int

@@ -22,6 +22,7 @@ class Survey(NoExtraBaseModel):
     date_created: datetime
     date_modified: datetime
     survey_id: int
+    owner_id: int
 
 
 class Surveys(NoExtraBaseModel):
