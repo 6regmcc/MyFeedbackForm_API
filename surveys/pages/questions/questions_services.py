@@ -256,14 +256,15 @@ def delete_open_choice_db(choice_id: int, db: Session):
 
 def delete_question_db(question_id: int, survey_id: int, db: Session):
 
-    query = delete(QuestionDB).where((QuestionDB.question_id == question_id) & (QuestionDB.survey_id == survey_id))
-    if query.description is None:
+    query = select(QuestionDB).where((QuestionDB.question_id == question_id) & (QuestionDB.survey_id == survey_id))
+    found_question = db.scalars(query).first()
+    if found_question is None:
         raise HTTPException(
             status_code=404,
             detail="Unable to find question"
         )
-    db.execute(query)
+    db.delete(found_question)
     db.commit()
-    deleted_question = {**query.__dict__}
+    deleted_question = {**found_question.__dict__}
     #del deleted_question._sa_instance_state
     return f"question deleted: {deleted_question}"
