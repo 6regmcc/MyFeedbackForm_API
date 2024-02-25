@@ -67,5 +67,7 @@ def get_survey_details(request: Request, survey_id: int, db: Session = Depends(g
             status_code=404,
             detail="Survey not found"
         )
-
     return found_survey
+
+
+

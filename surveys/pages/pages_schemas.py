@@ -1,11 +1,11 @@
 from datetime import datetime
+from core.pydantic_basemodel_config import NoExtraBaseModel
 
-from pydantic import BaseModel
 
 from surveys.pages.questions.questions_schemas import OpenEndedQuestion, MultipleChoiceQuestion
 
 
-class CreatePageRequest(BaseModel):
+class CreatePageRequest(NoExtraBaseModel):
     page_title: str | None = None
     page_description:  str | None = None
 

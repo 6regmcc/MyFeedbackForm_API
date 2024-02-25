@@ -6,7 +6,7 @@ from core.database import get_db
 from core.security import oauth2_scheme
 from surveys.pages.questions.questions_schemas import CreateQuestionRequest, CreateQuestionData, \
     CreateMultipleChoiceQuestionRequest, CreateMultipleChoiceQuestionData, CreateOpenEndedQuestionData, \
-    CreateQuestionResponse
+    CreateQuestionResponse, ClosedAnswerChoiceRequest, OpenEndedAnswerChoiceResponse, TestCreateClosedChoice
 from surveys.pages.questions.questions_services import create_multi_choice_question_db, get_question_db, \
     create_open_ended_question_db, set_question_position
 
@@ -66,3 +66,28 @@ def get_question(survey_id: int, page_id: int, question_id: int, request: Reques
         return found_question
 
 
+@router.post("/{question_id}/choices")
+def create_answer_choice(survey_id: int, page_id: int, question_id: int,
+                         new_ans_choice_request: TestCreateClosedChoice,
+                         request: Request, db: Session = Depends(get_db)):
+    owner_id = request.user.user_id
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+
+        )
+    found_question = get_question_db(survey_id=survey_id, question_id=question_id, db=db)
+    if found_question is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Not found"
+
+        )
+    if isinstance(new_ans_choice_request, TestCreateClosedChoice):
+        print("this workedasdfasdf")
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="didn't work"
+        )

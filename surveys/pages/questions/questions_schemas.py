@@ -4,13 +4,15 @@ from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 
+from core.pydantic_basemodel_config import NoExtraBaseModel
+
 
 class OpenEndedAnswerChoiceEnum(str, Enum):
     answer_choice = "answer_choice"
     other_answer_choice = "other_answer_choice"
 
 
-class OpenEndedAnswerChoiceRequest(BaseModel):
+class OpenEndedAnswerChoiceRequest(NoExtraBaseModel):
     open_ended_choice_type: str
     choice_label: str | None
 
@@ -35,11 +37,11 @@ class QuestionVariantEnum(str, Enum):
     multi_choice = "multi_choice"
 
 
-class ClosedAnswerChoiceRequest(BaseModel):
+class ClosedAnswerChoiceRequest(NoExtraBaseModel):
     choice_label: str
 
 
-class CreateQuestionRequest(BaseModel):
+class CreateQuestionRequest(NoExtraBaseModel):
     question_type: QuestionTypeEnum
     question_variant: QuestionVariantEnum
     question_text: str
@@ -80,7 +82,7 @@ class ClosedAnswerChoice(ClosedAnswerChoiceRequest):
         orm_mode = True
 
 
-class CreateMultipleChoiceQuestionData(BaseModel):
+class CreateMultipleChoiceQuestionData(NoExtraBaseModel):
     question_type: str = "closed_ended"
     question_variant: str = "single_choice"
     question_text: str
@@ -110,5 +112,8 @@ class OpenEndedQuestion(CreateQuestionResponse):
         orm_mode = True
 
 
+class TestCreateClosedChoice(NoExtraBaseModel):
+    choice_label: str
 
-
+    class Config:
+        extra = "forbid"

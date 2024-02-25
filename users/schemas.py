@@ -1,7 +1,9 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import EmailStr
+
+from core.pydantic_basemodel_config import NoExtraBaseModel
 
 
-class CreateUserRequest(BaseModel):
+class CreateUserRequest(NoExtraBaseModel):
     first_name: str
     last_name: str
     email: EmailStr
