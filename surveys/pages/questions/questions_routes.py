@@ -151,7 +151,7 @@ def delete_choice(survey_id: int, question_id: int, choice_id: int, request: Req
     if found_question.question_type == "closed_ended":
         return delete_closed_choice_db(choice_id=choice_id, db=db)
     elif found_question.question_type == "open_ended":
-        return delete_open_choice_db(choice_id=choice_id, db=db)
+        return delete_open_choice_db(question_id=question_id, choice_id=choice_id, db=db)
     else:
         return "something went wrong"
 

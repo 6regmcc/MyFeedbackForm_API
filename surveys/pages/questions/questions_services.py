@@ -249,7 +249,7 @@ def delete_closed_choice_db(choice_id: int, db: Session):
     return "choice deleted"
 
 
-def delete_open_choice_db(choice_id: int, db: Session):
+def delete_open_choice_db(question_id: int, choice_id: int, db: Session):
     query = db.get(OpenEndedAnswerChoice, choice_id)
     if query is None:
         raise HTTPException(
@@ -258,6 +258,10 @@ def delete_open_choice_db(choice_id: int, db: Session):
         )
     db.delete(query)
     db.commit()
+    choice_list = get_list_of_oe_choices(question_id, db=db)
+    update_choices = update_choice_position(question_id=question_id, question_type="open_ended", choice_list=choice_list, db=db)
+    if not update_choices == "choice list successfully updated":
+        return "something went wrong"
     return "choice deleted"
 
 
@@ -273,6 +277,7 @@ def delete_question_db(question_id: int, survey_id: int, db: Session):
     db.delete(found_question)
     db.commit()
     deleted_question = {**found_question.__dict__}
+
     #del deleted_question._sa_instance_state
     return f"question deleted: {deleted_question}"
 
@@ -305,9 +310,16 @@ def set_choice_position(question_id: int, question_type:str, db: Session):
 
 def update_choice_position(question_id: int, question_type: str, choice_list: list[int], db: Session):
     if question_type == "closed_ended":
+        if len(choice_list) != len(get_list_of_ce_choices(question_id=question_id, db=db)):
+            return "choice list incorrect length"
         for index, choice in enumerate(choice_list):
-            query = select(CloseEndedAnswerChoice).where(CloseEndedAnswerChoice.ce_choice_id == choice)
+            query = select(CloseEndedAnswerChoice).where((CloseEndedAnswerChoice.ce_choice_id == choice) & (CloseEndedAnswerChoice.question_id == question_id))
             found_choice = db.scalars(query).first()
+            if found_choice is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Unable to find answer choice_id: {choice}"
+                )
             found_choice.choice_position = index + 1
             db.commit()
 
@@ -319,9 +331,16 @@ def update_choice_position(question_id: int, question_type: str, choice_list: li
             return "something went wrong."
 
     if question_type == "open_ended":
+        if len(choice_list) != len(get_list_of_oe_choices(question_id=question_id, db=db)):
+            return "choice list incorrect length"
         for index, choice in enumerate(choice_list):
-            query = select(OpenEndedAnswerChoice).where(OpenEndedAnswerChoice.oe_choice_id == choice)
+            query = select(OpenEndedAnswerChoice).where((OpenEndedAnswerChoice.oe_choice_id == choice) & (OpenEndedAnswerChoice.question_id == question_id))
             found_choice = db.scalars(query).first()
+            if found_choice is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Unable to find answer choice_id: {choice}"
+                )
             found_choice.choice_position = index + 1
             db.commit()
 
