@@ -10,11 +10,11 @@ from surveys.pages.questions.questions_models import CloseEndedAnswerChoice, Ope
 from surveys.pages.questions.questions_schemas import CreateQuestionRequest, CreateQuestionData, \
     CreateMultipleChoiceQuestionRequest, CreateMultipleChoiceQuestionData, CreateOpenEndedQuestionData, \
     CreateQuestionResponse, ClosedAnswerChoiceRequest, \
-    OpenEndedAnswerChoiceRequest, ClosedAnswerChoiceRequestData, ClosedAnswerChoiceRequestArr
+    OpenEndedAnswerChoiceRequest, ClosedAnswerChoiceRequestData, ClosedAnswerChoiceRequestArr, UpdateChoiceList
 from surveys.pages.questions.questions_services import create_multi_choice_question_db, get_question_db, \
     create_open_ended_question_db, set_question_position, create_multi_choice_question_choice_db, \
     create_open_ended_answer_choice_db, delete_closed_choice_db, delete_open_choice_db, delete_question_db, \
-    set_choice_position
+    set_choice_position, update_choice_position
 
 router = APIRouter(
     prefix="/surveys/{survey_id}/pages/{page_id}/questions",
@@ -47,7 +47,6 @@ def get_question(survey_id: int, page_id: int, question_id: int, request: Reques
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=CreateQuestionResponse)
 def create_question(page_id: int, survey_id: int, create_question_request: CreateQuestionRequest,
                     db: Session = Depends(get_db)):
-
     if create_question_request.question_type == "closed_ended":
         new_multi_choice_question = CreateMultipleChoiceQuestionData(
             question_text=create_question_request.question_text,
@@ -101,9 +100,10 @@ def create_answer_choice(survey_id: int, page_id: int, question_id: int,
             question_id=question_id
         )
         return create_multi_choice_question_choice_db(new_closed_ans_choice, db=db)
-    elif isinstance(new_ans_choice_request, OpenEndedAnswerChoiceRequest) and found_question.question_type == "open_ended":
+    elif isinstance(new_ans_choice_request,
+                    OpenEndedAnswerChoiceRequest) and found_question.question_type == "open_ended":
         print("this is an open ended request")
-        new_open_ans_choice = OpenEndedAnswerChoice (
+        new_open_ans_choice = OpenEndedAnswerChoice(
             choice_label=new_ans_choice_request.choice_label,
             open_ended_choice_type=new_ans_choice_request.open_ended_choice_type,
             date_created=datetime.now(),
@@ -120,7 +120,7 @@ def create_answer_choice(survey_id: int, page_id: int, question_id: int,
 
 
 @router.delete("/{question_id}")
-def delete_question(survey_id: int, page_id:int, question_id: int, request: Request, db: Session = Depends(get_db)):
+def delete_question(survey_id: int, page_id: int, question_id: int, request: Request, db: Session = Depends(get_db)):
     owner_id = request.user.user_id
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
@@ -156,3 +156,18 @@ def delete_choice(survey_id: int, question_id: int, choice_id: int, request: Req
         return "something went wrong"
 
 
+@router.patch("/{question_id}/choices")
+def update_answer_choice_position(survey_id: int, question_id, update_choice_list: UpdateChoiceList, request: Request,
+                                  db: Session = Depends(get_db)):
+    owner_id = request.user.user_id
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+
+        )
+    found_question = get_question_db(survey_id=survey_id, question_id=question_id, db=db)
+
+    return update_choice_position(question_id=question_id,
+                                  question_type=found_question.question_type,
+                                  choice_list=update_choice_list.choice_list, db=db)

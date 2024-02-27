@@ -302,3 +302,31 @@ def set_choice_position(question_id: int, question_type:str, db: Session):
     elif question_type == "closed_ended":
         return len(get_list_of_ce_choices(question_id=question_id, db=db)) + 1
 
+
+def update_choice_position(question_id: int, question_type: str, choice_list: list[int], db: Session):
+    if question_type == "closed_ended":
+        for index, choice in enumerate(choice_list):
+            query = select(CloseEndedAnswerChoice).where(CloseEndedAnswerChoice.ce_choice_id == choice)
+            found_choice = db.scalars(query).first()
+            found_choice.choice_position = index + 1
+            db.commit()
+
+        updated_choice_position = get_list_of_ce_choices(question_id=question_id, db=db)
+
+        if updated_choice_position == choice_list:
+            return "choice list successfully updated"
+        else:
+            return "something went wrong."
+
+    if question_type == "open_ended":
+        for index, choice in enumerate(choice_list):
+            query = select(OpenEndedAnswerChoice).where(OpenEndedAnswerChoice.oe_choice_id == choice)
+            found_choice = db.scalars(query).first()
+            found_choice.choice_position = index + 1
+            db.commit()
+
+        updated_choice_position = get_list_of_oe_choices(question_id=question_id, db=db)
+        if updated_choice_position == choice_list:
+            return "choice list successfully updated"
+        else:
+            return "something went wrong."

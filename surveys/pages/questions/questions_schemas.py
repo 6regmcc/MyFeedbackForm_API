@@ -133,4 +133,5 @@ class OpenEndedQuestion(CreateQuestionResponse):
         orm_mode = True
 
 
-
+class UpdateChoiceList(NoExtraBaseModel):
+    choice_list: list[int]
