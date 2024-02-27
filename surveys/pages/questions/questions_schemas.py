@@ -135,3 +135,6 @@ class OpenEndedQuestion(CreateQuestionResponse):
 
 class UpdateChoiceList(NoExtraBaseModel):
     choice_list: list[int]
+
+class UpdateQuestionList(NoExtraBaseModel):
+    question_list: list[int]

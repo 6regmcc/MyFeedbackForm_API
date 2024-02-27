@@ -4,8 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy import func, select, delete
 from sqlalchemy.orm import Session
 
-
-
+from surveys.pages.pages_models import SurveyPageDB
 from surveys.pages.questions.questions_models import QuestionDB, CloseEndedAnswerChoice, OpenEndedAnswerChoice
 from surveys.pages.questions.questions_schemas import CreateMultipleChoiceQuestionData, \
     CreateQuestionData, CreateQuestionResponse, ClosedAnswerChoiceRequestData, ClosedAnswerChoice, \
@@ -349,3 +348,33 @@ def update_choice_position(question_id: int, question_type: str, choice_list: li
             return "choice list successfully updated"
         else:
             return "something went wrong."
+
+
+def update_question_position_db(survey_id: int, page_id: int, question_list: list[int], db: Session):
+    query = select(SurveyPageDB).where((SurveyPageDB.survey_id == survey_id) & (SurveyPageDB.page_id == page_id))
+    found_page = db.scalar(query)
+    if found_page is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find survey page"
+        )
+    if len(question_list) != len(get_list_of_question_on_page(page_id=found_page.page_id, db=db)):
+        return "incorrect question_id list length"
+
+    for index, question in enumerate(question_list):
+        query = select(QuestionDB).where((QuestionDB.page_id == page_id) & (QuestionDB.survey_id == survey_id) & (QuestionDB.question_id == question))
+        found_question = db.scalar(query)
+        if found_question is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Unable to find question"
+            )
+        found_question.question_position = index + 1
+        db.commit()
+
+    updated_question_list = get_list_of_question_on_page(page_id=found_page.page_id, db=db)
+    if updated_question_list == question_list:
+        return "question position successfully updated"
+    else:
+        return "something went wrong"
+

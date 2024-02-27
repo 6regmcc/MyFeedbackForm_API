@@ -10,11 +10,12 @@ from surveys.pages.questions.questions_models import CloseEndedAnswerChoice, Ope
 from surveys.pages.questions.questions_schemas import CreateQuestionRequest, CreateQuestionData, \
     CreateMultipleChoiceQuestionRequest, CreateMultipleChoiceQuestionData, CreateOpenEndedQuestionData, \
     CreateQuestionResponse, ClosedAnswerChoiceRequest, \
-    OpenEndedAnswerChoiceRequest, ClosedAnswerChoiceRequestData, ClosedAnswerChoiceRequestArr, UpdateChoiceList
+    OpenEndedAnswerChoiceRequest, ClosedAnswerChoiceRequestData, ClosedAnswerChoiceRequestArr, UpdateChoiceList, \
+    UpdateQuestionList
 from surveys.pages.questions.questions_services import create_multi_choice_question_db, get_question_db, \
     create_open_ended_question_db, set_question_position, create_multi_choice_question_choice_db, \
     create_open_ended_answer_choice_db, delete_closed_choice_db, delete_open_choice_db, delete_question_db, \
-    set_choice_position, update_choice_position
+    set_choice_position, update_choice_position, update_question_position_db
 
 router = APIRouter(
     prefix="/surveys/{survey_id}/pages/{page_id}/questions",
@@ -156,7 +157,7 @@ def delete_choice(survey_id: int, question_id: int, choice_id: int, request: Req
         return "something went wrong"
 
 
-@router.patch("/{question_id}/choices")
+@router.patch("/{question_id}/choices/update_position")
 def update_answer_choice_position(survey_id: int, question_id, update_choice_list: UpdateChoiceList, request: Request,
                                   db: Session = Depends(get_db)):
     owner_id = request.user.user_id
@@ -171,3 +172,16 @@ def update_answer_choice_position(survey_id: int, question_id, update_choice_lis
     return update_choice_position(question_id=question_id,
                                   question_type=found_question.question_type,
                                   choice_list=update_choice_list.choice_list, db=db)
+
+
+@router.patch("/update_position")
+def update_questions_position(survey_id: int, page_id: int, update_question_list: UpdateQuestionList, request: Request, db: Session = Depends(get_db)):
+    owner_id = request.user.user_id
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+
+        )
+
+    return update_question_position_db(survey_id=survey_id, page_id=page_id, question_list=update_question_list.question_list, db=db)

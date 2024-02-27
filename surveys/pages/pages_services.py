@@ -33,6 +33,7 @@ def get_page_db(survey_id: int, page_id: int, db: Session):
     if page is None:
         return None
     question_list = get_list_of_question_on_page(page_id=page.page_id, db=db)
+    del page._sa_instance_state
     survey_page = SurveyPage(
         **page.__dict__,
         questions=question_list
