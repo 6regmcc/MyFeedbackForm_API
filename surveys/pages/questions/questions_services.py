@@ -9,7 +9,7 @@ from surveys.pages.questions.questions_models import QuestionDB, CloseEndedAnswe
 from surveys.pages.questions.questions_schemas import CreateMultipleChoiceQuestionData, \
     CreateQuestionData, CreateQuestionResponse, ClosedAnswerChoiceRequestData, ClosedAnswerChoice, \
     MultipleChoiceQuestion, OpenEndedAnswerChoiceRequest, OpenEndedAnswerChoiceResponse, OpenEndedQuestion, \
-    ClosedAnswerChoiceRequest
+    ClosedAnswerChoiceRequest, UpdateQuestionRequest
 
 
 def create_question_db(new_question: CreateQuestionData, db: Session) -> CreateQuestionResponse:
@@ -384,5 +384,18 @@ def update_question_position_db(survey_id: int, page_id: int, question_list: lis
         return "something went wrong"
 
 
+def update_question_db(survey_id: int, page_id: int, question_id: int, update_question_data: UpdateQuestionRequest, db: Session):
+    query = select(QuestionDB).where((QuestionDB.survey_id == survey_id) & (QuestionDB.page_id == page_id) & (QuestionDB.question_id == question_id))
+    found_question: QuestionDB = db.scalar(query)
+    if found_question is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find question"
+        )
+    found_question.question_text = update_question_data.question_text
+    found_question.date_modified = datetime.now()
+    db.commit()
+    db.refresh(found_question)
 
+    return get_question_db(survey_id=survey_id, question_id=question_id, db=db)
 

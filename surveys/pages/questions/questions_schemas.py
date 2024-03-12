@@ -138,3 +138,9 @@ class UpdateChoiceList(NoExtraBaseModel):
 
 class UpdateQuestionList(NoExtraBaseModel):
     question_list: list[int]
+
+
+class UpdateQuestionRequest(NoExtraBaseModel):
+    question_text: str
+
+
