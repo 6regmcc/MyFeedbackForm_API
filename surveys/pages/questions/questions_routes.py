@@ -129,7 +129,7 @@ def delete_question(survey_id: int, page_id: int, question_id: int, request: Req
             detail="You do not have access to this resource"
 
         )
-    return delete_question_db(question_id=question_id, survey_id=survey_id, db=db)
+    return delete_question_db(question_id=question_id, page_id=page_id, survey_id=survey_id, db=db)
 
 
 @router.delete("/{question_id}/choices/{choice_id}")

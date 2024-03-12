@@ -264,7 +264,7 @@ def delete_open_choice_db(question_id: int, choice_id: int, db: Session):
     return "choice deleted"
 
 
-def delete_question_db(question_id: int, survey_id: int, db: Session):
+def delete_question_db(question_id: int, survey_id: int, page_id: int, db: Session):
 
     query = select(QuestionDB).where((QuestionDB.question_id == question_id) & (QuestionDB.survey_id == survey_id))
     found_question = db.scalars(query).first()
@@ -276,8 +276,9 @@ def delete_question_db(question_id: int, survey_id: int, db: Session):
     db.delete(found_question)
     db.commit()
     deleted_question = {**found_question.__dict__}
+    question_list = get_list_of_question_on_page(page_id=page_id, db=db)
+    updated_questions_position = update_question_position_db(survey_id=survey_id,page_id=page_id, question_list=question_list, db=db)
 
-    #del deleted_question._sa_instance_state
     return f"question deleted: {deleted_question}"
 
 
@@ -377,4 +378,7 @@ def update_question_position_db(survey_id: int, page_id: int, question_list: lis
         return "question position successfully updated"
     else:
         return "something went wrong"
+
+
+
 
