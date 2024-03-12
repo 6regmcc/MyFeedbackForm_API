@@ -29,5 +29,9 @@ class SurveyPageDetails(CreatePageResponse):
     questions: list[OpenEndedQuestion | MultipleChoiceQuestion]
 
 
+class UpdatePageList(NoExtraBaseModel):
+    page_list: list[int]
+
+
 
 

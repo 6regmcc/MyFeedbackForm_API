@@ -79,3 +79,8 @@ def delete_survey_db(survey_id: int, db: Session):
     # del deleted_question._sa_instance_state
     return f"survey deleted: {deleted_question}"
 
+
+
+
+
+

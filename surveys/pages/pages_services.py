@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-
+from surveys.moldels import SurveyModel
 from surveys.pages.pages_models import SurveyPageDB
 from surveys.pages.pages_schemas import CreatePageData, SurveyPage, SurveyPageDetails
 from surveys.pages.questions.questions_services import get_list_of_question_on_page, get_question_list_details_db
@@ -83,3 +83,32 @@ def delete_page_db(survey_id: int, page_id: int, db: Session):
     deleted_page = {**query.__dict__}
     # del deleted_question._sa_instance_state
     return f"question page: {deleted_page}"
+
+
+def update_page_position_db(survey_id: int, page_list: list[int], db: Session):
+    query = select(SurveyModel).where(SurveyModel.survey_id == survey_id)
+    found_survey = db.scalar(query)
+    if found_survey is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find survey"
+        )
+
+    if len(page_list) != len(get_list_of_pages_db(survey_id=survey_id, db=db)):
+        return "incorrect page list length"
+
+    for index, page in enumerate(page_list):
+        query = select(SurveyPageDB).where((SurveyPageDB.page_id == page) & (SurveyPageDB.survey_id == survey_id))
+        found_page = db.scalar(query)
+        if found_page is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"unable to find page: {page} at index {index}"
+            )
+        found_page.page_position = index + 1
+        db.commit()
+    update_page_position = get_list_of_pages_db(survey_id=survey_id, db=db)
+    if update_page_position == page_list:
+        return "page position successfully updated"
+    else:
+        return "something went wrong"

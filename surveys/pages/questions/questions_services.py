@@ -278,7 +278,11 @@ def delete_question_db(question_id: int, survey_id: int, page_id: int, db: Sessi
     deleted_question = {**found_question.__dict__}
     question_list = get_list_of_question_on_page(page_id=page_id, db=db)
     updated_questions_position = update_question_position_db(survey_id=survey_id,page_id=page_id, question_list=question_list, db=db)
-
+    if updated_questions_position is None:
+        raise HTTPException(
+            status_code=500,
+            detail="There was a problem updating question position after delete"
+        )
     return f"question deleted: {deleted_question}"
 
 

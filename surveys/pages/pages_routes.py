@@ -4,8 +4,10 @@ from sqlalchemy.orm import Session
 from auth.services import check_if_user_has_access_to_survey
 from core.database import get_db
 from core.security import oauth2_scheme
-from surveys.pages.pages_schemas import CreatePageRequest, CreatePageData, SurveyPage
-from surveys.pages.pages_services import create_page_db, get_page_db, get_page_details_db, delete_page_db
+from surveys.pages.pages_schemas import CreatePageRequest, CreatePageData, SurveyPage, UpdatePageList
+from surveys.pages.pages_services import create_page_db, get_page_db, get_page_details_db, delete_page_db, \
+    update_page_position_db
+from surveys.pages.questions.questions_services import update_question_position_db
 
 router = APIRouter(
     prefix="/surveys/{survey_id}/pages",
@@ -74,3 +76,15 @@ def delete_page(page_id: int, survey_id: int, request: Request, db: Session = De
 
         )
     return delete_page_db(survey_id=survey_id, page_id=page_id, db=db)
+
+
+@router.patch("/update_position")
+def update_page_position(survey_id: int, page_list: UpdatePageList, request: Request, db: Session = Depends(get_db)):
+    owner_id = request.user.user_id
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+
+        )
+    return update_page_position_db(survey_id=survey_id, page_list=page_list.page_list, db=db)
