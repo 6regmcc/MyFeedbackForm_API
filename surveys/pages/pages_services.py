@@ -42,6 +42,7 @@ def get_page_db(survey_id: int, page_id: int, db: Session):
     return survey_page
 
 
+
 def get_page_details_db(survey_id: int, page_id: int, db: Session):
     page_query = select(SurveyPageDB).where((SurveyPageDB.survey_id == survey_id) & (SurveyPageDB.page_id == page_id)).order_by(SurveyPageDB.page_position)
     page = db.scalars(page_query).first()

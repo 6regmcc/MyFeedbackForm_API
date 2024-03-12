@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from surveys.moldels import SurveyModel
 from surveys.pages.pages_services import create_page_db, get_list_of_pages_db, get_page_details_db
-from surveys.schemas import CreateSurveyData, Survey, SurveyWithPages, SurveyWithPagesDetails
+from surveys.schemas import CreateSurveyData, Survey, SurveyWithPages, SurveyWithPagesDetails, CreateSurveyRequest
 from surveys.pages.pages_models import SurveyPageDB
 
 
@@ -80,7 +80,21 @@ def delete_survey_db(survey_id: int, db: Session):
     return f"survey deleted: {deleted_question}"
 
 
+def update_survey_db(survey_id: int, update_survey_data: CreateSurveyRequest, db: Session):
+    query = select(SurveyModel).where(SurveyModel.survey_id == survey_id)
+    found_survey = db.scalars(query).first()
+    if found_survey is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find question"
+        )
+    found_survey.survey_name = update_survey_data.survey_name
+    found_survey.date_modified = datetime.now()
+    db.commit()
+    db.refresh(found_survey)
+    del found_survey._sa_instance_state
+    survey_to_return = Survey(**found_survey.__dict__)
 
-
+    return survey_to_return
 
 
