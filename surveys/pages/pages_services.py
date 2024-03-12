@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 
 from surveys.moldels import SurveyModel
 from surveys.pages.pages_models import SurveyPageDB
-from surveys.pages.pages_schemas import CreatePageData, SurveyPage, SurveyPageDetails
+from surveys.pages.pages_schemas import CreatePageData, SurveyPage, SurveyPageDetails, CreatePageRequest, \
+    CreatePageResponse
 from surveys.pages.questions.questions_services import get_list_of_question_on_page, get_question_list_details_db
 
 
@@ -117,3 +118,20 @@ def update_page_position_db(survey_id: int, page_list: list[int], db: Session):
         return "page position successfully updated"
     else:
         return "something went wrong"
+
+
+def update_page_db(survey_id: int, page_id: int, update_page_data: CreatePageRequest, db: Session):
+    query = select(SurveyPageDB).where((SurveyPageDB.survey_id == survey_id) & (SurveyPageDB.page_id == page_id))
+    found_page = db.scalar(query)
+    if found_page is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find survey page"
+        )
+    found_page.page_title = update_page_data.page_title
+    found_page.page_description = update_page_data.page_description
+    found_page.date_modified = datetime.now()
+    db.commit()
+    db.refresh(found_page)
+    del found_page._sa_instance_state
+    return CreatePageResponse(**found_page.__dict__)

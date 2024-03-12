@@ -84,4 +84,10 @@ def delete_survey(request: Request, survey_id: int, db: Session = Depends(get_db
 
 @router.put("/{survey_id}", response_model=Survey)
 def update_survey(survey_id: int, update_survey_data: CreateSurveyRequest, request: Request,  db: Session = Depends(get_db)):
+    owner_id = request.user.user_id
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+        )
     return update_survey_db(survey_id=survey_id, update_survey_data=update_survey_data, db=db)
