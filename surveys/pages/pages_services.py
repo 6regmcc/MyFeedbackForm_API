@@ -76,13 +76,17 @@ def delete_page_db(survey_id: int, page_id: int, db: Session):
     if query is None:
         raise HTTPException(
             status_code=404,
-            detail="Unable to find question"
+            detail="Unable to find page"
         )
     db.delete(query)
     db.commit()
     deleted_page = {**query.__dict__}
-    # del deleted_question._sa_instance_state
-    return f"question page: {deleted_page}"
+    updated_page_list = get_list_of_pages_db(survey_id=survey_id, db=db)
+    new_page_position = update_page_position_db(survey_id=survey_id, page_list=updated_page_list, db=db)
+    if not new_page_position == "page position successfully updated":
+        return "something went wrong updating page position"
+    else:
+        return f"question page: {deleted_page}"
 
 
 def update_page_position_db(survey_id: int, page_list: list[int], db: Session):
