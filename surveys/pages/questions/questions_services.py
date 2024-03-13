@@ -415,11 +415,13 @@ def update_answer_choice_db(survey_id: int, page_id: int, question_id: int, choi
     question_type = get_question_type(survey_id=survey_id, page_id=page_id, question_id=question_id, db=db)
     if question_type == "open_ended":
         return update_open_ended_answer_choice(choice_id=choice_id, update_choice_data=update_choice_data, db=db)
+    if question_type == "closed_ended":
+        return update_closed_ended_answer_choice(choice_id=choice_id, update_choice_data=update_choice_data, db=db)
 
 
 def update_open_ended_answer_choice(choice_id: int, update_choice_data: UpdateOpenEndedAnswerChoice, db: Session):
     query = select(OpenEndedAnswerChoice).where(OpenEndedAnswerChoice.oe_choice_id == choice_id)
-    found_choice: OpenEndedAnswerChoice = db.scalar(query)
+    found_choice = db.scalar(query)
     if found_choice is None:
         raise HTTPException(
             status_code=404,
@@ -434,5 +436,25 @@ def update_open_ended_answer_choice(choice_id: int, update_choice_data: UpdateOp
     return OpenEndedAnswerChoiceResponse(**found_choice.__dict__)
 
 
-
-
+def update_closed_ended_answer_choice(choice_id: int, update_choice_data: UpdateOpenEndedAnswerChoice, db: Session):
+    query = select(CloseEndedAnswerChoice).where(CloseEndedAnswerChoice.ce_choice_id == choice_id)
+    found_choice = db.scalar(query)
+    if found_choice is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find answer choice"
+        )
+    found_choice.choice_label = update_choice_data.choice_label
+    found_choice.date_modified = datetime.now()
+    db.commit()
+    db.refresh(found_choice)
+    #del found_choice._sa_instance_state
+    #del found_choice.question_id
+    choice_to_return = ClosedAnswerChoice(
+        ce_choice_id=found_choice.ce_choice_id,
+        choice_label=found_choice.choice_label,
+        date_created=found_choice.date_created,
+        date_modified=found_choice.date_modified,
+        choice_position=found_choice.choice_position
+    )
+    return choice_to_return

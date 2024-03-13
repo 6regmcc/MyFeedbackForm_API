@@ -41,6 +41,9 @@ class OpenEndedAnswerChoice(OpenEndedAnswerChoiceData):
 class ClosedAnswerChoiceRequest(NoExtraBaseModel):
     choice_label: str
 
+    class Config:
+        orm_mode = True
+
 
 class ClosedAnswerChoice(ClosedAnswerChoiceRequest):
     ce_choice_id: int

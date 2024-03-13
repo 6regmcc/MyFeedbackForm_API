@@ -11,7 +11,8 @@ from surveys.pages.questions.questions_schemas import CreateQuestionRequest, Cre
     CreateMultipleChoiceQuestionRequest, CreateMultipleChoiceQuestionData, CreateOpenEndedQuestionData, \
     CreateQuestionResponse, ClosedAnswerChoiceRequest, \
     OpenEndedAnswerChoiceRequest, ClosedAnswerChoiceRequestData, ClosedAnswerChoiceRequestArr, UpdateChoiceList, \
-    UpdateQuestionList, UpdateQuestionRequest, UpdateOpenEndedAnswerChoice, OpenEndedAnswerChoiceResponse
+    UpdateQuestionList, UpdateQuestionRequest, UpdateOpenEndedAnswerChoice, OpenEndedAnswerChoiceResponse, \
+    ClosedAnswerChoice
 from surveys.pages.questions.questions_services import create_multi_choice_question_db, get_question_db, \
     create_open_ended_question_db, set_question_position, create_multi_choice_question_choice_db, \
     create_open_ended_answer_choice_db, delete_closed_choice_db, delete_open_choice_db, delete_question_db, \
@@ -200,7 +201,7 @@ def update_question(survey_id: int, page_id: int, question_id: int, update_quest
     return update_question_db(survey_id=survey_id, page_id=page_id, question_id=question_id, update_question_data=update_question_data, db=db)
 
 
-@router.put("/{question_id}/choices/{choice_id}/update_choice", response_model=OpenEndedAnswerChoiceResponse)
+@router.put("/{question_id}/choices/{choice_id}/update_choice", response_model=OpenEndedAnswerChoiceResponse | ClosedAnswerChoice)
 def update_answer_choice(survey_id: int, page_id: int, question_id: int, choice_id: int, update_choice_data: UpdateOpenEndedAnswerChoice, request: Request, db: Session = Depends(get_db)):
     owner_id = request.user.user_id
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
