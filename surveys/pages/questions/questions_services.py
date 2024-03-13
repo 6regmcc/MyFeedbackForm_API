@@ -9,7 +9,7 @@ from surveys.pages.questions.questions_models import QuestionDB, CloseEndedAnswe
 from surveys.pages.questions.questions_schemas import CreateMultipleChoiceQuestionData, \
     CreateQuestionData, CreateQuestionResponse, ClosedAnswerChoiceRequestData, ClosedAnswerChoice, \
     MultipleChoiceQuestion, OpenEndedAnswerChoiceRequest, OpenEndedAnswerChoiceResponse, OpenEndedQuestion, \
-    ClosedAnswerChoiceRequest, UpdateQuestionRequest
+    ClosedAnswerChoiceRequest, UpdateQuestionRequest, UpdateOpenEndedAnswerChoice
 
 
 def create_question_db(new_question: CreateQuestionData, db: Session) -> CreateQuestionResponse:
@@ -398,4 +398,41 @@ def update_question_db(survey_id: int, page_id: int, question_id: int, update_qu
     db.refresh(found_question)
 
     return get_question_db(survey_id=survey_id, question_id=question_id, db=db)
+
+
+def get_question_type(survey_id: int, page_id: int, question_id: int, db: Session):
+    query = select(QuestionDB).where((QuestionDB.survey_id == survey_id) & (QuestionDB.page_id == page_id) & (QuestionDB.question_id == question_id))
+    found_question = db.scalar(query)
+    if found_question is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find question"
+        )
+    return found_question.question_type
+
+
+def update_answer_choice_db(survey_id: int, page_id: int, question_id: int, choice_id: int, update_choice_data: UpdateOpenEndedAnswerChoice, db: Session):
+    question_type = get_question_type(survey_id=survey_id, page_id=page_id, question_id=question_id, db=db)
+    if question_type == "open_ended":
+        return update_open_ended_answer_choice(choice_id=choice_id, update_choice_data=update_choice_data, db=db)
+
+
+def update_open_ended_answer_choice(choice_id: int, update_choice_data: UpdateOpenEndedAnswerChoice, db: Session):
+    query = select(OpenEndedAnswerChoice).where(OpenEndedAnswerChoice.oe_choice_id == choice_id)
+    found_choice: OpenEndedAnswerChoice = db.scalar(query)
+    if found_choice is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find answer choice"
+        )
+
+    found_choice.choice_label = update_choice_data.choice_label
+    found_choice.date_modified = datetime.now()
+    db.commit()
+    db.refresh(found_choice)
+    del found_choice._sa_instance_state
+    return OpenEndedAnswerChoiceResponse(**found_choice.__dict__)
+
+
+
 

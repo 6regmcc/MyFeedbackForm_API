@@ -14,7 +14,11 @@ class OpenEndedAnswerChoiceEnum(str, Enum):
 
 class OpenEndedAnswerChoiceRequest(NoExtraBaseModel):
     open_ended_choice_type: str
-    choice_label: str | None
+    choice_label: str
+
+
+class UpdateOpenEndedAnswerChoice(NoExtraBaseModel):
+    choice_label: str
 
 
 class OpenEndedAnswerChoiceData(OpenEndedAnswerChoiceRequest):
