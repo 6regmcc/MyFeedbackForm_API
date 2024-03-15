@@ -21,13 +21,11 @@ user_router = APIRouter(
 )
 
 
-
-
-@router.post('', status_code=status.HTTP_201_CREATED)
+@router.post('', status_code=201)
 async def create_user(data: CreateUserRequest, db: Session = Depends(get_db)):
     await create_user_account(data=data, db=db)
-    payload = {"message": "User account has been created successfully"}
-    return JSONResponse(content=payload)
+
+    return {"message": "User account has been created successfully"}
 
 
 @user_router.post('/me', status_code=status.HTTP_200_OK, response_model=UserResponse)

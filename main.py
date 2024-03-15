@@ -9,7 +9,9 @@ from surveys.pages.pages_routes import router as pages_router
 from surveys.pages.questions.questions_routes import router as questions_router
 from starlette.middleware.authentication import AuthenticationMiddleware
 from core.security import JWTAuth
+from starlette.middleware.cors import CORSMiddleware
 import uvicorn
+
 
 
 Base.metadata.create_all(engine)
@@ -24,6 +26,17 @@ app.include_router(pages_router)
 app.include_router(questions_router)
 
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())
+
+origins = ["http://localhost:6006"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"]
+)
 
 
 @app.get('/')
