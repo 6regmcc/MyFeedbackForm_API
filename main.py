@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.responses import JSONResponse
 
 from core.database import Base, engine
@@ -11,6 +11,7 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 from core.security import JWTAuth
 from starlette.middleware.cors import CORSMiddleware
 import uvicorn
+import uuid
 
 
 
@@ -42,6 +43,14 @@ app.add_middleware(
 @app.get('/')
 def root():
     return {"status": "Running"}
+
+
+@app.get("/test_cookie")
+def get_session_cookie(response: Response):
+    response.set_cookie(key="fakesession", value=uuid.uuid4())
+    return {"message": "Come to the dark side, we have cookies"}
+
+
 
 
 if __name__ == "__main__":
