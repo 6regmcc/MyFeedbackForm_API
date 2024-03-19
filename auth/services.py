@@ -77,3 +77,14 @@ def check_if_user_has_access_to_question(owner_id: int, survey_id: int, question
     found_question = db.scalars(query).first()
     return found_question
 
+
+def get_user_id(request):
+    try:
+        owner_id = request.user.user_id
+        return owner_id
+    except AttributeError:
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthorised"
+        )
+

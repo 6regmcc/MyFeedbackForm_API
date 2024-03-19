@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, Request, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from auth.services import check_if_user_has_access_to_survey
+from auth.services import check_if_user_has_access_to_survey, get_user_id
 from core.database import get_db
 from core.security import oauth2_scheme
 from surveys.pages.pages_schemas import CreatePageRequest, CreatePageData, SurveyPage, UpdatePageList, \
@@ -21,7 +21,14 @@ router = APIRouter(
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-def create_page(survey_id: int, data: CreatePageRequest, db: Session = Depends(get_db)):
+def create_page(survey_id: int, data: CreatePageRequest, request: Request, db: Session = Depends(get_db)):
+    owner_id = get_user_id(request)
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+
+        )
     new_page = CreatePageData(
         survey_id=survey_id,
         page_title=data.page_title,
@@ -33,7 +40,7 @@ def create_page(survey_id: int, data: CreatePageRequest, db: Session = Depends(g
 
 @router.get("/{page_id}", response_model=SurveyPage)
 def get_page(survey_id: int, page_id: int, request: Request, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -51,7 +58,7 @@ def get_page(survey_id: int, page_id: int, request: Request, db: Session = Depen
 
 @router.get("/{page_id}/details")
 def get_page_details(page_id: int, survey_id: int, request: Request, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -71,7 +78,7 @@ def get_page_details(page_id: int, survey_id: int, request: Request, db: Session
 
 @router.delete("/{page_id}")
 def delete_page(page_id: int, survey_id: int, request: Request, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -83,7 +90,7 @@ def delete_page(page_id: int, survey_id: int, request: Request, db: Session = De
 
 @router.patch("/update_position")
 def update_page_position(survey_id: int, page_list: UpdatePageList, request: Request, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -95,7 +102,7 @@ def update_page_position(survey_id: int, page_list: UpdatePageList, request: Req
 
 @router.put("/{page_id}" , response_model=CreatePageResponse)
 def update_page(survey_id: int, page_id: int, update_page_data: CreatePageRequest,  request: Request, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,

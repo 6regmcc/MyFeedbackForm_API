@@ -27,7 +27,7 @@ app.include_router(questions_router)
 
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())
 
-origins = ["http://localhost:6006"]
+origins = ["http://localhost:6006", "http://localhost:5173", "http://localhost:5174"]
 
 app.add_middleware(
     CORSMiddleware,

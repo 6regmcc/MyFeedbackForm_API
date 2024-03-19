@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, Request, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from auth.services import check_if_user_has_access_to_survey
+from auth.services import check_if_user_has_access_to_survey, get_user_id
 from core.database import get_db
 from core.security import oauth2_scheme
 from surveys.schemas import CreateSurveyRequest, CreateSurveyData, CreateSurveyResponse, Survey, Surveys, \
@@ -28,7 +28,7 @@ def create_survey(data: CreateSurveyRequest, request: Request, db: Session = Dep
 
 @router.get("", response_model=Surveys)
 def get_surveys(request: Request, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     found_surveys = get_surveys_db(owner_id, db)
     survey_arr = []
     for survey in found_surveys:
@@ -38,7 +38,7 @@ def get_surveys(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/{survey_id}", response_model=SurveyWithPages)
 def get_survey(request: Request, survey_id: int, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -56,7 +56,7 @@ def get_survey(request: Request, survey_id: int, db: Session = Depends(get_db)):
 
 @router.get("/{survey_id}/details")
 def get_survey_details(request: Request, survey_id: int, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -73,7 +73,7 @@ def get_survey_details(request: Request, survey_id: int, db: Session = Depends(g
 
 @router.delete("/{survey_id}")
 def delete_survey(request: Request, survey_id: int, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -84,7 +84,7 @@ def delete_survey(request: Request, survey_id: int, db: Session = Depends(get_db
 
 @router.put("/{survey_id}", response_model=Survey)
 def update_survey(survey_id: int, update_survey_data: CreateSurveyRequest, request: Request,  db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,

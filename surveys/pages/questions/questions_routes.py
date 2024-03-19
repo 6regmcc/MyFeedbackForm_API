@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, status, Request, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from auth.services import check_if_user_has_access_to_survey
+from auth.services import check_if_user_has_access_to_survey, get_user_id
 from core.database import get_db
 from core.security import oauth2_scheme
 from surveys.pages.questions.questions_models import CloseEndedAnswerChoice, OpenEndedAnswerChoice
@@ -29,7 +29,7 @@ router = APIRouter(
 
 @router.get("/{question_id}")
 def get_question(survey_id: int, page_id: int, question_id: int, request: Request, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -48,8 +48,14 @@ def get_question(survey_id: int, page_id: int, question_id: int, request: Reques
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=CreateQuestionResponse)
-def create_question(page_id: int, survey_id: int, create_question_request: CreateQuestionRequest,
+def create_question(page_id: int, survey_id: int, create_question_request: CreateQuestionRequest, request: Request,
                     db: Session = Depends(get_db)):
+    owner_id = get_user_id(request)
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+        )
     if create_question_request.question_type == "closed_ended":
         new_multi_choice_question = CreateMultipleChoiceQuestionData(
             question_text=create_question_request.question_text,
@@ -79,7 +85,7 @@ def create_question(page_id: int, survey_id: int, create_question_request: Creat
 def create_answer_choice(survey_id: int, page_id: int, question_id: int,
                          new_ans_choice_request: OpenEndedAnswerChoiceRequest | ClosedAnswerChoiceRequest,
                          request: Request, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -124,7 +130,7 @@ def create_answer_choice(survey_id: int, page_id: int, question_id: int,
 
 @router.delete("/{question_id}")
 def delete_question(survey_id: int, page_id: int, question_id: int, request: Request, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -136,7 +142,7 @@ def delete_question(survey_id: int, page_id: int, question_id: int, request: Req
 
 @router.delete("/{question_id}/choices/{choice_id}")
 def delete_choice(survey_id: int, question_id: int, choice_id: int, request: Request, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -162,7 +168,7 @@ def delete_choice(survey_id: int, question_id: int, choice_id: int, request: Req
 @router.patch("/{question_id}/choices/update_position")
 def update_answer_choice_position(survey_id: int, question_id, update_choice_list: UpdateChoiceList, request: Request,
                                   db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -178,7 +184,7 @@ def update_answer_choice_position(survey_id: int, question_id, update_choice_lis
 
 @router.patch("/update_position")
 def update_questions_position(survey_id: int, page_id: int, update_question_list: UpdateQuestionList, request: Request, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -191,7 +197,7 @@ def update_questions_position(survey_id: int, page_id: int, update_question_list
 
 @router.put("/{question_id}", response_model=CreateQuestionResponse)
 def update_question(survey_id: int, page_id: int, question_id: int, update_question_data: UpdateQuestionRequest ,request: Request,  db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
@@ -203,7 +209,7 @@ def update_question(survey_id: int, page_id: int, question_id: int, update_quest
 
 @router.put("/{question_id}/choices/{choice_id}/update_choice", response_model=OpenEndedAnswerChoiceResponse | ClosedAnswerChoice)
 def update_answer_choice(survey_id: int, page_id: int, question_id: int, choice_id: int, update_choice_data: UpdateOpenEndedAnswerChoice, request: Request, db: Session = Depends(get_db)):
-    owner_id = request.user.user_id
+    owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
         raise HTTPException(
             status_code=403,
