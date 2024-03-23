@@ -175,7 +175,7 @@ def get_question_list_details_db(page_id: int,survey_id: int, db: Session):
 
 def return_multi_choice_question(found_question: QuestionDB, question_id: int, db: Session) -> MultipleChoiceQuestion:
     choices_arr = []
-    choices = db.query(CloseEndedAnswerChoice).filter(CloseEndedAnswerChoice.question_id == question_id)
+    choices = db.query(CloseEndedAnswerChoice).filter(CloseEndedAnswerChoice.question_id == question_id).order_by(CloseEndedAnswerChoice.choice_position)
     for choice in choices:
         choices_arr.append(ClosedAnswerChoice(
             ce_choice_id=choice.ce_choice_id,
