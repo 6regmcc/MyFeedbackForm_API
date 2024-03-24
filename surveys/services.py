@@ -11,7 +11,7 @@ from responses.responses_models import Collectors
 from surveys.moldels import SurveyModel
 from surveys.pages.pages_services import create_page_db, get_list_of_pages_db, get_page_details_db
 from surveys.schemas import CreateSurveyData, Survey, SurveyWithPages, SurveyWithPagesDetails, CreateSurveyRequest, \
-    Collector
+    Collector, CreateCollectorRequest
 from surveys.pages.pages_models import SurveyPageDB
 
 
@@ -117,3 +117,39 @@ def create_collector_db(survey_id: int, db:Session):
     db.refresh(new_collector)
     del new_collector._sa_instance_state
     return Collector(**new_collector.__dict__)
+
+
+def get_survey_collectors_db(survey_id: int, db: Session):
+    query = select(Collectors).where(Collectors.survey_id == survey_id)
+    found_collectors = db.scalars(query).all()
+    if found_collectors is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find any survey collectors"
+        )
+    collector_list = []
+    for collector in found_collectors:
+        collector_list.append(collector)
+    return {"collectors":collector_list}
+
+
+def get_collector_db(survey_id: int, collector_id: int, db: Session):
+    query = select(Collectors).where((Collectors.collector_id == collector_id) & Collectors.survey_id == survey_id)
+    found_collector = db.scalar(query)
+    del found_collector._sa_instance_state
+    return Collector(**found_collector.__dict__)
+
+
+def update_collector_db(survey_id: int, collector_id: int, data: CreateCollectorRequest, db: Session):
+    query = select(Collectors).where((Collectors.survey_id == survey_id) & (Collectors.collector_id == collector_id))
+    found_collector = db.scalar(query)
+    if found_collector is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Unable to find collector"
+        )
+    found_collector.is_open = data.is_open
+    db.commit()
+    db.refresh(found_collector)
+    del found_collector._sa_instance_state
+    return Collector(**found_collector.__dict__)

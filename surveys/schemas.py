@@ -48,3 +48,7 @@ class CreateCollectorData(CreateCollectorRequest):
 class Collector(CreateCollectorData):
     collector_id: int
     date_created: datetime
+
+
+class CollectorList(NoExtraBaseModel):
+    collectors: list[Collector]
