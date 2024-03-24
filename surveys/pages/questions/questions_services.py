@@ -203,7 +203,7 @@ def return_multi_choice_question(found_question: QuestionDB, question_id: int, d
 
 def return_open_ended_question(found_question: QuestionDB, question_id, db):
     choices_arr = []
-    query = select(OpenEndedAnswerChoice).where(OpenEndedAnswerChoice.question_id == question_id)
+    query = select(OpenEndedAnswerChoice).where(OpenEndedAnswerChoice.question_id == question_id).order_by(OpenEndedAnswerChoice.choice_position)
     choices = db.scalars(query).all()
     for choice in choices:
         choices_arr.append(OpenEndedAnswerChoiceResponse(

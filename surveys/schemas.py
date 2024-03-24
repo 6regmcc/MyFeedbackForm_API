@@ -35,3 +35,16 @@ class SurveyWithPages(Survey):
 
 class SurveyWithPagesDetails(Survey):
     pages: list
+
+class CreateCollectorRequest(NoExtraBaseModel):
+    survey_id: int
+    is_open: bool
+
+
+class CreateCollectorData(CreateCollectorRequest):
+    url: str
+
+
+class Collector(CreateCollectorData):
+    collector_id: int
+    date_created: datetime

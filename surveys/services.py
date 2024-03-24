@@ -1,12 +1,17 @@
+import string
 from datetime import datetime
+import random
+
 
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from responses.responses_models import Collectors
 from surveys.moldels import SurveyModel
 from surveys.pages.pages_services import create_page_db, get_list_of_pages_db, get_page_details_db
-from surveys.schemas import CreateSurveyData, Survey, SurveyWithPages, SurveyWithPagesDetails, CreateSurveyRequest
+from surveys.schemas import CreateSurveyData, Survey, SurveyWithPages, SurveyWithPagesDetails, CreateSurveyRequest, \
+    Collector
 from surveys.pages.pages_models import SurveyPageDB
 
 
@@ -23,7 +28,9 @@ def create_survey_db(data: CreateSurveyData, db: Session):
     db.commit()
     db.refresh(new_survey)
     new_page = SurveyPageDB(
-        survey_id = new_survey.survey_id
+        survey_id = new_survey.survey_id,
+        page_title = "",
+        page_description = ""
     )
     create_page_db(new_page, db)
     return new_survey
@@ -98,3 +105,15 @@ def update_survey_db(survey_id: int, update_survey_data: CreateSurveyRequest, db
     return survey_to_return
 
 
+def create_collector_db(survey_id: int, db:Session):
+    new_collector = Collectors(
+        survey_id=survey_id,
+        url=''.join(random.choices(string.ascii_uppercase + string.digits, k=10)),
+        is_open=True,
+        date_created=datetime.now()
+    )
+    db.add(new_collector)
+    db.commit()
+    db.refresh(new_collector)
+    del new_collector._sa_instance_state
+    return Collector(**new_collector.__dict__)

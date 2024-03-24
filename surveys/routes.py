@@ -6,9 +6,9 @@ from auth.services import check_if_user_has_access_to_survey, get_user_id
 from core.database import get_db
 from core.security import oauth2_scheme
 from surveys.schemas import CreateSurveyRequest, CreateSurveyData, CreateSurveyResponse, Survey, Surveys, \
-    SurveyWithPages
+    SurveyWithPages, CreateCollectorRequest, Collector
 from surveys.services import create_survey_db, get_surveys_db, get_survey_db, get_survey_details_db, delete_survey_db, \
-    update_survey_db
+    update_survey_db, create_collector_db
 
 router = APIRouter(
     prefix="/surveys",
@@ -93,4 +93,14 @@ def update_survey(survey_id: int, update_survey_data: CreateSurveyRequest, reque
         )
     return update_survey_db(survey_id=survey_id, update_survey_data=update_survey_data, db=db)
 
+
+@router.post("/{survey_id}/collectors", response_model=Collector)
+def create_collector(survey_id: int, request: Request,  db: Session = Depends(get_db)):
+    owner_id = get_user_id(request)
+    if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this resource"
+        )
+    return create_collector_db(survey_id, db=db)
 
