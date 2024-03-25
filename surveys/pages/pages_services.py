@@ -30,18 +30,20 @@ def create_page_db(data: CreatePageData, db: Session):
 
 def get_page_db(survey_id: int, page_id: int, db: Session):
     page_query = select(SurveyPageDB).where(SurveyPageDB.survey_id == survey_id).where(SurveyPageDB.page_id == page_id)
-    page = db.scalars(page_query).first()
+    page = db.scalar(page_query)
     if page is None:
         return None
     question_list = get_list_of_question_on_page(page_id=page.page_id, db=db)
     del page._sa_instance_state
+
     survey_page = SurveyPage(
         **page.__dict__,
-        questions=question_list
+        questions=question_list,
+        #total_pages=
+
     )
 
     return survey_page
-
 
 
 def get_page_details_db(survey_id: int, page_id: int, db: Session):
@@ -50,14 +52,27 @@ def get_page_details_db(survey_id: int, page_id: int, db: Session):
     if page is None:
         return None
     question_list = get_question_list_details_db(page_id=page.page_id, survey_id=survey_id, db=db)
+    total_pages = len(get_list_of_pages_db(survey_id=survey_id,db=db))
+    survey_name = get_survey_name_with_id(survey_id=survey_id, db=db)
     del page._sa_instance_state
     survey_page = SurveyPageDetails(
         **page.__dict__,
-
-        questions=question_list
+        total_pages=total_pages,
+        questions=question_list,
+        survey_name=survey_name
     )
 
     return survey_page
+
+def get_survey_name_with_id(survey_id: int, db: Session) -> str:
+    query = select(SurveyModel.survey_name).where(SurveyModel.survey_id == survey_id)
+    survey_name = db.scalar(query)
+    if survey_name is None:
+        raise HTTPException(
+            status_code=404,
+            detail="something went wrong trying to get survey name"
+        )
+    return survey_name
 
 
 def get_list_of_pages_db(survey_id: int, db: Session) -> list[int]:

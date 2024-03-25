@@ -7,6 +7,7 @@ from auth.routes import router as auth_router
 from surveys.routes import router as surveys_router
 from surveys.pages.pages_routes import router as pages_router
 from surveys.pages.questions.questions_routes import router as questions_router
+from responses.responses_routes import router as responses_router
 from starlette.middleware.authentication import AuthenticationMiddleware
 from core.security import JWTAuth
 from starlette.middleware.cors import CORSMiddleware
@@ -25,6 +26,7 @@ app.include_router(auth_router)
 app.include_router(surveys_router)
 app.include_router(pages_router)
 app.include_router(questions_router)
+app.include_router(responses_router)
 
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())
 

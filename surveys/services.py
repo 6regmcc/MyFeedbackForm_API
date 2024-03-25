@@ -120,7 +120,7 @@ def create_collector_db(survey_id: int, db:Session):
 
 
 def get_survey_collectors_db(survey_id: int, db: Session):
-    query = select(Collectors).where(Collectors.survey_id == survey_id)
+    query = select(Collectors).where(Collectors.survey_id == survey_id).order_by(Collectors.date_created)
     found_collectors = db.scalars(query).all()
     if found_collectors is None:
         raise HTTPException(
@@ -154,6 +154,7 @@ def update_collector_db(survey_id: int, collector_id: int, data: CreateCollector
     del found_collector._sa_instance_state
     return Collector(**found_collector.__dict__)
 
+
 def delete_collector_db(survey_id: int, collector_id: int, db: Session):
     query = select(Collectors).where((Collectors.survey_id == survey_id) & (Collectors.collector_id == collector_id))
     found_collector = db.scalar(query)
@@ -163,6 +164,6 @@ def delete_collector_db(survey_id: int, collector_id: int, db: Session):
             detail="Unable to find collector"
         )
     db.delete(found_collector)
-    db.refresh(found_collector)
+    db.commit()
     del found_collector._sa_instance_state
     return Collector(**found_collector.__dict__)

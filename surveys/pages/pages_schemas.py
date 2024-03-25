@@ -22,10 +22,13 @@ class CreatePageResponse(CreatePageData):
 
 
 class SurveyPage(CreatePageResponse):
+
     questions: list[int]
 
 
 class SurveyPageDetails(CreatePageResponse):
+    survey_name: str
+    total_pages: int
     questions: list[OpenEndedQuestion | MultipleChoiceQuestion]
 
 

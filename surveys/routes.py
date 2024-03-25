@@ -141,8 +141,8 @@ def update_collector(survey_id: int, collector_id: int, data: CreateCollectorReq
     return update_collector_db(survey_id=survey_id, collector_id=collector_id, data=data, db=db)
 
 
-@router.delete("/{survey_id}/collectors/{collector_id}", response_model=Collector)
-def delete_collector(survey_id: int, collector_id: int, data: CreateCollectorRequest, request: Request,
+@router.delete("/{survey_id}/collectors/{collector_id}")
+def delete_collector(survey_id: int, collector_id: int, request: Request,
                      db: Session = Depends(get_db)):
     owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
