@@ -36,9 +36,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"]
+    allow_methods=["GET", "POST", "PATCH", "OPTIONS", "PUT", "DELETE"],
+    allow_headers=["Content-Type", "x-requested-with", "Authorization", "Set-Cookie"],
+    expose_headers=['Set-Cookie', 'Authorization', 'Origin', 'X-Requested-With', 'Content-Type', 'Accept']
 )
 
 
@@ -49,7 +49,7 @@ def root():
 
 @app.get("/test_cookie")
 def get_session_cookie(response: Response):
-    response.set_cookie(key="fakesession", value=uuid.uuid4())
+    response.set_cookie(key="fakesession", value="sdfsdfsdf")
     return {"message": "Come to the dark side, we have cookies"}
 
 

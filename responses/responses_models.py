@@ -19,7 +19,7 @@ class ClosedEndedResponses(Base):
     __tablename__ = 'closed_ended_responses'
     response_id = Column(Integer, ForeignKey('responses.response_id'), primary_key=True,  nullable=False, index=True)
     question_id = Column(Integer, ForeignKey('questions.question_id'), primary_key=True, nullable=False, index=True)
-    ce_choice_id = Column(Integer, ForeignKey('questions.close_ended_answer_choices'), primary_key=True, nullable=False, index=True)
+    ce_choice_id = Column(Integer, ForeignKey('close_ended_answer_choices.ce_choice_id'), primary_key=True, nullable=False, index=True)
 
 
 class OpenEndedResponses(Base):
