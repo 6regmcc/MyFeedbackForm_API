@@ -92,7 +92,7 @@ def create_response_question_db(collector_url, page_number, data: CreateOrEditRe
     return {
         "response_id": found_response.response_id,
         "collector_id": found_response.collector_id,
-        "session_id": found_response.session_id,
+        "session_id": str(found_response.session_id),
         "date_created": found_response.date_created,
         "date_modified": found_response.date_modified,
         "answers": saved_question_responses

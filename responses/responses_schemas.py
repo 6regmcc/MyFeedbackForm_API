@@ -12,7 +12,7 @@ from core.pydantic_basemodel_config import NoExtraBaseModel
 class SurveyResponseSchema(NoExtraBaseModel):
     survey_id: int
     collector_id: int
-    session_id: UUID
+    session_id: str
     response_id: int
     date_created: datetime
     date_modified: datetime
@@ -38,3 +38,16 @@ class CreateOrEditResponse(NoExtraBaseModel):
     answers: list[CreateOrEditResponseMultiChoiceQuestion]
 
 
+class MultiChoiceResponseAnswers(NoExtraBaseModel):
+    ce_choice_id: int
+    question_id: int
+    response_id: int
+
+
+class SurveyResponseWithAnswers(NoExtraBaseModel):
+    response_id: int
+    collector_id: int
+    session_id: str
+    date_created: datetime
+    date_modified: datetime
+    answers: list[MultiChoiceResponseAnswers]
