@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from responses.responses_models import Collectors, SurveyResponse, ClosedEndedResponses
-from responses.responses_schemas import CreateOrEditResponse
+from responses.responses_schemas import CreateOrEditResponse, CheckboxResponseAnswers
 from surveys.moldels import SurveyModel
 from surveys.pages.pages_models import SurveyPageDB
 from surveys.pages.pages_schemas import SurveyPageDetails
@@ -63,7 +63,7 @@ def create_response_db(collector_url: str, db: Session):
 
 def create_response_question_db(collector_url, page_number, data: CreateOrEditResponse, db):
     found_collector = get_collector_from_collector_url(collector_url=collector_url, db=db)
-    query = select(SurveyResponse).where(SurveyResponse.collector_id == found_collector.collector_id)
+    query = select(SurveyResponse).where(SurveyResponse.session_id == data.session_id)
     found_response = db.scalar(query)
 
     if found_response is None and page_number == 1:
@@ -84,11 +84,19 @@ def create_response_question_db(collector_url, page_number, data: CreateOrEditRe
             status_code=400,
             detail="Something went wrong. go back to ppage 1"
         )
+    found_response.date_modified = datetime.now()
+    db.add(found_response)
+    db.commit()
     saved_question_responses = []
     for question in data.answers:
         if question.question_type.question_type == "closed_ended" and question.question_type.question_variant == "single_choice":
             new_ce_response = save_or_update_multi_choice_question(response_id=found_response.response_id, question_id=question.submitted_response.question_id, ce_choice_id=question.submitted_response.ce_choice_id, db=db)
             saved_question_responses.append(new_ce_response)
+        elif question.question_type.question_type == "closed_ended" and question.question_type.question_variant == "multi_choice":
+            new_checkbox_responses = save_or_update_checkbox_question(response_id=found_response.response_id, question_id=question.submitted_response.question_id, ce_choices=question.submitted_response.ce_choices, db=db)
+            saved_question_responses.append(new_checkbox_responses)
+
+
     return {
         "response_id": found_response.response_id,
         "collector_id": found_response.collector_id,
@@ -98,8 +106,9 @@ def create_response_question_db(collector_url, page_number, data: CreateOrEditRe
         "answers": saved_question_responses
     }
 
+
 def save_or_update_multi_choice_question(response_id, question_id, ce_choice_id, db: Session):
-    query = select(ClosedEndedResponses).where((ClosedEndedResponses.response_id == response_id) & (ClosedEndedResponses.question_id == question_id) & (ClosedEndedResponses.ce_choice_id == ce_choice_id))
+    query = select(ClosedEndedResponses).where((ClosedEndedResponses.response_id == response_id) & (ClosedEndedResponses.question_id == question_id))
     found_response = db.scalar(query)
     if found_response:
         print('ce response found')
@@ -108,10 +117,41 @@ def save_or_update_multi_choice_question(response_id, question_id, ce_choice_id,
     new_ce_response = ClosedEndedResponses(
         response_id=response_id,
         question_id=question_id,
-        ce_choice_id=ce_choice_id
+        ce_choice_id=ce_choice_id,
+        date_created=datetime.now()
     )
     db.add(new_ce_response)
     db.commit()
     db.refresh(new_ce_response)
     return new_ce_response
+
+
+def save_or_update_checkbox_question(response_id: int, question_id: int, ce_choices: list[int], db: Session):
+    query = select(ClosedEndedResponses).where(
+        (ClosedEndedResponses.response_id == response_id) & (ClosedEndedResponses.question_id == question_id))
+    found_responses = db.scalars(query).all()
+    if found_responses:
+        for response in found_responses:
+            print('ce responses found')
+            db.delete(response)
+            db.commit()
+    new_checkbox_responses: list[int] = []
+    for choice in ce_choices:
+        new_checkbox_response = ClosedEndedResponses(
+            response_id=response_id,
+            question_id=question_id,
+            ce_choice_id=choice,
+            date_created=datetime.now()
+        )
+        db.add(new_checkbox_response)
+        db.commit()
+        db.refresh(new_checkbox_response)
+        new_checkbox_responses.append(new_checkbox_response.ce_choice_id)
+    return CheckboxResponseAnswers(
+        response_id=response_id,
+        question_id=question_id,
+        ce_choices=new_checkbox_responses
+
+    )
+
 

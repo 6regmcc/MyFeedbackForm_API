@@ -18,9 +18,14 @@ class SurveyResponseSchema(NoExtraBaseModel):
     date_modified: datetime
 
 
-class TypeOfQuestionInfo(NoExtraBaseModel):
+class MultiChoiceQuestionTypeInfo(NoExtraBaseModel):
     question_type: str = "closed_ended"
     question_variant: str = "single_choice"
+
+
+class CheckboxQuestionTypeInfo(NoExtraBaseModel):
+    question_type: str = "closed_ended"
+    question_variant: str = "multi_choice"
 
 
 class SubmittedResponseMultiChoiceQuestion(NoExtraBaseModel):
@@ -28,14 +33,20 @@ class SubmittedResponseMultiChoiceQuestion(NoExtraBaseModel):
     ce_choice_id: int
 
 
-class CreateOrEditResponseMultiChoiceQuestion(NoExtraBaseModel):
-    question_type: TypeOfQuestionInfo
-    submitted_response: SubmittedResponseMultiChoiceQuestion
+class SubmittedCheckboxQuestion(NoExtraBaseModel):
+    question_id: int
+    ce_choices: list[int]
+
+
+class CreateOrEditResponseCeChoiceQuestion(NoExtraBaseModel):
+    question_type: MultiChoiceQuestionTypeInfo | CheckboxQuestionTypeInfo
+    submitted_response: SubmittedResponseMultiChoiceQuestion | SubmittedCheckboxQuestion
+
 
 
 class CreateOrEditResponse(NoExtraBaseModel):
     session_id: str
-    answers: list[CreateOrEditResponseMultiChoiceQuestion]
+    answers: list[CreateOrEditResponseCeChoiceQuestion]
 
 
 class MultiChoiceResponseAnswers(NoExtraBaseModel):
@@ -44,10 +55,16 @@ class MultiChoiceResponseAnswers(NoExtraBaseModel):
     response_id: int
 
 
+class CheckboxResponseAnswers(NoExtraBaseModel):
+    question_id: int
+    response_id: int
+    ce_choices: list[int]
+
+
 class SurveyResponseWithAnswers(NoExtraBaseModel):
     response_id: int
     collector_id: int
     session_id: str
     date_created: datetime
     date_modified: datetime
-    answers: list[MultiChoiceResponseAnswers]
+    answers: list[MultiChoiceResponseAnswers| CheckboxResponseAnswers]
