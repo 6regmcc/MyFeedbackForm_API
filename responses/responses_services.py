@@ -5,8 +5,8 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from responses.responses_models import Collectors, SurveyResponse, ClosedEndedResponses
-from responses.responses_schemas import CreateOrEditResponse, CheckboxResponseAnswers
+from responses.responses_models import Collectors, SurveyResponse, ClosedEndedResponses, OpenEndedResponses
+from responses.responses_schemas import CreateOrEditResponse, CheckboxResponseAnswers, SingleTextboxResponseAnswers
 from surveys.moldels import SurveyModel
 from surveys.pages.pages_models import SurveyPageDB
 from surveys.pages.pages_schemas import SurveyPageDetails
@@ -95,6 +95,9 @@ def create_response_question_db(collector_url, page_number, data: CreateOrEditRe
         elif question.question_type.question_type == "closed_ended" and question.question_type.question_variant == "multi_choice":
             new_checkbox_responses = save_or_update_checkbox_question(response_id=found_response.response_id, question_id=question.submitted_response.question_id, ce_choices=question.submitted_response.ce_choices, db=db)
             saved_question_responses.append(new_checkbox_responses)
+        elif question.question_type.question_type == "open_ended" and question.question_type.question_variant == "single_choice":
+            new_single_text_response = save_or_update_single_textbox_question(response_id=found_response.response_id, question_id=question.submitted_response.question_id, oe_choice_id=question.submitted_response.oe_choice_id, answer_text=question.submitted_response.answer_text, db=db)
+            saved_question_responses.append(new_single_text_response)
 
 
     return {
@@ -155,3 +158,28 @@ def save_or_update_checkbox_question(response_id: int, question_id: int, ce_choi
     )
 
 
+def save_or_update_single_textbox_question(response_id: int, question_id: int, oe_choice_id: int, answer_text: str, db: Session):
+    query = select(OpenEndedResponses).where(
+        (OpenEndedResponses.response_id == response_id) & (OpenEndedResponses.question_id == question_id))
+    found_response = db.scalar(query)
+    if found_response:
+        db.delete(found_response)
+        db.commit()
+    new_single_text_response =     OpenEndedResponses(
+        response_id=response_id,
+        question_id=question_id,
+        oe_choice_id=oe_choice_id,
+        date_created=datetime.now(),
+        answer_text=answer_text
+    )
+    db.add(new_single_text_response)
+    db.commit()
+    db.refresh(new_single_text_response)
+
+    return SingleTextboxResponseAnswers (
+        response_id=new_single_text_response.response_id,
+        question_id=new_single_text_response.question_id,
+        oe_choice_id=new_single_text_response.oe_choice_id,
+        date_created=new_single_text_response.datetime.now(),
+        answer_text=new_single_text_response.answer_text
+    )

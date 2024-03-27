@@ -29,6 +29,8 @@ class OpenEndedResponses(Base):
     question_id = Column(Integer, ForeignKey('questions.question_id'), primary_key=True, nullable=False, index=True)
     oe_choice_id = Column(Integer, ForeignKey('questions.open_ended_answer_choices'), primary_key=True, nullable=False,
                           index=True)
+    answer_text = Column(String(500))
+    date_created = Column(DateTime, nullable=False, server_default=func.now())
 
 
 class Collectors(Base):

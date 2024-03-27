@@ -13,8 +13,9 @@ class OpenEndedAnswerChoiceEnum(str, Enum):
 
 
 class OpenEndedAnswerChoiceRequest(NoExtraBaseModel):
-    open_ended_choice_type: str
+    open_ended_choice_type: str = "question"
     choice_label: str
+
 
 
 class UpdateOpenEndedAnswerChoice(NoExtraBaseModel):
@@ -77,7 +78,7 @@ class CreateQuestionRequest(NoExtraBaseModel):
     question_type: QuestionTypeEnum
     question_variant: QuestionVariantEnum
     question_text: str
-    answer_choices: list[OpenEndedAnswerChoiceRequest | ClosedAnswerChoiceRequest] | None = None
+    answer_choices: list[ClosedAnswerChoiceRequest | OpenEndedAnswerChoiceRequest]
     has_other_answer_choice: bool = False
 
     class Config:

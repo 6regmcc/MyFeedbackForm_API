@@ -28,6 +28,11 @@ class CheckboxQuestionTypeInfo(NoExtraBaseModel):
     question_variant: str = "multi_choice"
 
 
+class SingleTextboxQuestionTypeInfo(NoExtraBaseModel):
+    question_type: str = "open_ended"
+    question_variant: str = "single_choice"
+
+
 class SubmittedResponseMultiChoiceQuestion(NoExtraBaseModel):
     question_id: int
     ce_choice_id: int
@@ -38,10 +43,15 @@ class SubmittedCheckboxQuestion(NoExtraBaseModel):
     ce_choices: list[int]
 
 
-class CreateOrEditResponseCeChoiceQuestion(NoExtraBaseModel):
-    question_type: MultiChoiceQuestionTypeInfo | CheckboxQuestionTypeInfo
-    submitted_response: SubmittedResponseMultiChoiceQuestion | SubmittedCheckboxQuestion
+class SubmittedSingleTextboxQuestion(NoExtraBaseModel):
+    question_id: int
+    oe_choice_id: int
+    answer_text: str
 
+
+class CreateOrEditResponseCeChoiceQuestion(NoExtraBaseModel):
+    question_type: MultiChoiceQuestionTypeInfo | CheckboxQuestionTypeInfo | SingleTextboxQuestionTypeInfo
+    submitted_response: SubmittedResponseMultiChoiceQuestion | SubmittedCheckboxQuestion | SubmittedSingleTextboxQuestion
 
 
 class CreateOrEditResponse(NoExtraBaseModel):
@@ -61,10 +71,18 @@ class CheckboxResponseAnswers(NoExtraBaseModel):
     ce_choices: list[int]
 
 
+class SingleTextboxResponseAnswers(NoExtraBaseModel):
+    question_id: int
+    response_id: int
+    oe_choice_id: int
+    answer_text: str
+
+
+
 class SurveyResponseWithAnswers(NoExtraBaseModel):
     response_id: int
     collector_id: int
     session_id: str
     date_created: datetime
     date_modified: datetime
-    answers: list[MultiChoiceResponseAnswers| CheckboxResponseAnswers]
+    answers: list[MultiChoiceResponseAnswers| CheckboxResponseAnswers | SingleTextboxResponseAnswers]
