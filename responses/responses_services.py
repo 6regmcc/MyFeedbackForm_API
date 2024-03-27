@@ -180,6 +180,6 @@ def save_or_update_single_textbox_question(response_id: int, question_id: int, o
         response_id=new_single_text_response.response_id,
         question_id=new_single_text_response.question_id,
         oe_choice_id=new_single_text_response.oe_choice_id,
-        date_created=new_single_text_response.datetime.now(),
+        date_created=datetime.now(),
         answer_text=new_single_text_response.answer_text
     )

@@ -76,6 +76,7 @@ class SingleTextboxResponseAnswers(NoExtraBaseModel):
     response_id: int
     oe_choice_id: int
     answer_text: str
+    date_created: datetime
 
 
 

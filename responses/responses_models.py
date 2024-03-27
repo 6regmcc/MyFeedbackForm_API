@@ -27,7 +27,7 @@ class OpenEndedResponses(Base):
     __tablename__ = 'open_ended_responses'
     response_id = Column(Integer, ForeignKey('responses.response_id'), primary_key=True, nullable=False, index=True)
     question_id = Column(Integer, ForeignKey('questions.question_id'), primary_key=True, nullable=False, index=True)
-    oe_choice_id = Column(Integer, ForeignKey('questions.open_ended_answer_choices'), primary_key=True, nullable=False,
+    oe_choice_id = Column(Integer, ForeignKey('open_ended_answer_choices.oe_choice_id'), primary_key=True, nullable=False,
                           index=True)
     answer_text = Column(String(500))
     date_created = Column(DateTime, nullable=False, server_default=func.now())
