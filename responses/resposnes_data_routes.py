@@ -41,7 +41,7 @@ def get_responses_table_data(survey_id: int, request: Request, db: Session = Dep
 	select 
 	concat(open_ended_responses.response_id, closed_ended_responses.response_id) as response_id_,
 responses.date_created, responses.date_modified, collectors.url as collector_url,
-JSON_AGG(json_build_object('choice_id', concat(open_ended_responses.oe_choice_id,closed_ended_responses.ce_choice_id), 'response', concat(open_ended_responses.answer_text ,close_ended_answer_choices.choice_label )))  as responses
+JSON_AGG(json_build_object('question_type', questions.question_variant,  'question_id', concat(open_ended_responses.question_id, closed_ended_responses.question_id),    'choice_id', concat(open_ended_responses.oe_choice_id,closed_ended_responses.ce_choice_id), 'response', concat(open_ended_responses.answer_text ,close_ended_answer_choices.choice_label )))  as responses
 FROM questions
 left join open_ended_responses
  on questions.question_id = open_ended_responses.question_id
@@ -57,8 +57,7 @@ left join collectors
 	on responses.collector_id = collectors.collector_id
 	where questions.survey_id = {survey_id}
 	group by response_id_, responses.date_created, responses.date_modified, collector_url
-) as query
-"""
+) as query"""
     results_arr = []
     rs = db.scalars(text(statement)).all()
     for row in rs:
