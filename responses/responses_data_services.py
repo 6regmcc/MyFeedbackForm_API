@@ -8,7 +8,13 @@ from surveys.services import get_survey_details_db, get_survey_db
 
 def get_table_heading_db(survey_id: int, db: Session):
     found_survey = get_survey_details_db(survey_id=survey_id, db=db)
-    column_headers = []
+    column_headers = [
+        {"field": "Response_id"},
+        {"field": "Date Created"},
+        {"field": "Date Modified"},
+        {"field": "Collector URL"}
+
+    ]
     for page in found_survey.pages:
         for question in page.questions:
             if question.question_type == "closed_ended" and question.question_variant == "multi_choice":
@@ -24,4 +30,8 @@ def get_table_heading_db(survey_id: int, db: Session):
                     "children": checkbox_choices_headers
                 }
                 column_headers.append(checkbox_question_header)
+            else:
+                column_headers.append({"field": str(question.question_id), "headerName": question.question_text})
     return column_headers
+
+
