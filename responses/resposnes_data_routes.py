@@ -29,7 +29,7 @@ def get_table_heading(survey_id: int, request: Request, db: Session = Depends(ge
     return get_table_heading_db(survey_id=survey_id, db=db)
 
 
-@router.get('/responses_table_data')
+@router.get('/responses_table_data/{survey_id}')
 def get_responses_table_data(survey_id: int, request: Request, db: Session = Depends(get_db)):
     owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
