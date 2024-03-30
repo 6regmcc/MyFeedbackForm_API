@@ -11,7 +11,7 @@ settings = get_setting()
 
 engine = create_engine(
     #os.getenv("POSTGRESQL_URL"),
-    os.environ("POSTGRESQL_URL"),
+    os.environ.get("POSTGRESQL_URL"),
     pool_pre_ping=True,
     pool_recycle=300,
     pool_size=10,
