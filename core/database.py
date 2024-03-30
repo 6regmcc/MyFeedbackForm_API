@@ -8,7 +8,7 @@ from sqlalchemy import MetaData
 settings = get_setting()
 
 engine = create_engine(
-    settings.DATABASE_URL,
+    settings.POSTGRESQL_URL,
     pool_pre_ping=True,
     pool_recycle=300,
     pool_size=10,

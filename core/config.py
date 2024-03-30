@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     DB_HOST: str = os.getenv("POSTGRESQL_SERVER")
     DB_PORT: str = os.getenv("POSTGRESQL_PORT")
     DATABASE_URL: str = f"postgresql+psycopg2://postgres:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    POSTGRESQL_URL: str = os.getenv("POSTGRESQL_URL")
 
     # JWT
     JWT_SECRET: str = os.getenv("JWT_SECRET", "77dbf997d69675b8e6bf182804330523cf4dfc9842ea0c899d2cc9504c5dadf5")
