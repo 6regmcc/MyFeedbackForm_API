@@ -32,7 +32,7 @@ app.include_router(responses_data_router)
 
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())
 
-origins = ["http://localhost:6006", "http://localhost:5173", "http://localhost:5174", "http://localhost:8080", "http://172.17.0.2:8080/"]
+origins = ["http://localhost:6006", "http://localhost:5173", "http://localhost:5174", "http://localhost:8080", "http://172.17.0.2:8080/", "https://myfeedbackform-front-end.onrender.com"]
 
 app.add_middleware(
     CORSMiddleware,
