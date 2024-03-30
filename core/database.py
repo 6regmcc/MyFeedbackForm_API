@@ -1,3 +1,5 @@
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from typing import Generator
@@ -8,7 +10,8 @@ from sqlalchemy import MetaData
 settings = get_setting()
 
 engine = create_engine(
-    settings.POSTGRESQL_URL,
+    #os.getenv("POSTGRESQL_URL"),
+    os.environ("POSTGRESQL_URL"),
     pool_pre_ping=True,
     pool_recycle=300,
     pool_size=10,
