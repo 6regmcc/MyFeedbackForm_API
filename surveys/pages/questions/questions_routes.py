@@ -83,7 +83,7 @@ def create_question(page_id: int, survey_id: int, create_question_request: Creat
 
 @router.post("/{question_id}/choices")
 def create_answer_choice(survey_id: int, page_id: int, question_id: int,
-                         new_ans_choice_request: OpenEndedAnswerChoiceRequest | ClosedAnswerChoiceRequest,
+                         new_ans_choice_request:  ClosedAnswerChoiceRequest | OpenEndedAnswerChoiceRequest,
                          request: Request, db: Session = Depends(get_db)):
     owner_id = get_user_id(request)
     if not check_if_user_has_access_to_survey(owner_id=owner_id, survey_id=survey_id, db=db):
